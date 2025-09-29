@@ -14,6 +14,26 @@ public class WorldClockViewModel
     /// 預設主要顯示的城市名稱
     /// </summary>
     public string DefaultCity { get; set; } = "台北";
+
+    /// <summary>
+    /// 預設城市的當前時間 (伺服器端計算)
+    /// </summary>
+    public string CurrentTime { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 預設城市的當前日期 (伺服器端計算)
+    /// </summary>
+    public string CurrentDate { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 預設城市的時區資訊
+    /// </summary>
+    public string TimeZoneInfo { get; set; } = "GMT+08:00";
+
+    /// <summary>
+    /// 預設城市的 IANA 時區識別碼
+    /// </summary>
+    public string TimeZoneId { get; set; } = "Asia/Taipei";
 }
 
 /// <summary>

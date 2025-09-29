@@ -12,11 +12,11 @@
 
     <!-- 主要時間顯示區域 -->
     <div class="main-clock-section mb-5">
-        <div class="main-clock-card" data-city="@Model.DefaultCity" data-timezone="">
+        <div class="main-clock-card" data-city="@Model.DefaultCity" data-timezone="@Model.TimeZoneId">
             <h2 class="main-city-name">@Model.DefaultCity</h2>
-            <div class="main-time-display">00:00:00</div>
-            <small class="main-timezone-info">GMT+08:00</small>
-            <div class="main-date-display"></div>
+            <div class="main-time-display">@Model.CurrentTime</div>
+            <small class="main-timezone-info">@Model.TimeZoneInfo</small>
+            <div class="main-date-display">@Model.CurrentDate</div>
         </div>
     </div>
 

@@ -32,11 +32,23 @@ public class WorldClockController : Controller
 
         try
         {
+            var cities = GetDefaultCities();
+            var defaultCityName = GetValidCityName(main) ?? "台北";
+            var defaultCityData = cities.FirstOrDefault(c => c.Name == defaultCityName);
+
+            // 計算預設城市的當前時間
+            var currentTime = GetCurrentTimeForCity(defaultCityData);
+            var currentDate = GetCurrentDateForCity(defaultCityData);
+
             // 建立檢視模型
             var model = new WorldClockViewModel
             {
-                Cities = GetDefaultCities(),
-                DefaultCity = GetValidCityName(main) ?? "台北"
+                Cities = cities,
+                DefaultCity = defaultCityName,
+                CurrentTime = currentTime,
+                CurrentDate = currentDate,
+                TimeZoneInfo = defaultCityData?.TimeZoneAbbreviation ?? "GMT+08:00",
+                TimeZoneId = defaultCityData?.TimeZone ?? "Asia/Taipei"
             };
 
             // 設定頁面標題和中繼資料
@@ -243,5 +255,63 @@ public class WorldClockController : Controller
             "Australia/Sydney" => "AUS Eastern Standard Time",
             _ => ianaTimeZoneId // 如果沒有對應，直接使用原始識別碼
         };
+    }
+
+    /// <summary>
+    /// 取得指定城市的當前時間
+    /// </summary>
+    /// <param name="cityData">城市時區資料，如果為 null 則使用本地時間</param>
+    /// <returns>格式化的時間字串 (HH:mm:ss)</returns>
+    private static string GetCurrentTimeForCity(CityTimeZone? cityData)
+    {
+        try
+        {
+            if (cityData?.TimeZone is null)
+            {
+                // 如果沒有指定城市資料，使用本地時間
+                return DateTime.Now.ToString("HH:mm:ss");
+            }
+
+            // 使用 TimeZoneInfo 來取得指定時區的時間
+            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(ConvertToWindowsTimeZoneId(cityData.TimeZone));
+            var utcNow = DateTime.UtcNow;
+            var localTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, timeZoneInfo);
+            
+            return localTime.ToString("HH:mm:ss");
+        }
+        catch (Exception)
+        {
+            // 如果時區轉換失敗，回到本地時間
+            return DateTime.Now.ToString("HH:mm:ss");
+        }
+    }
+
+    /// <summary>
+    /// 取得指定城市的當前日期
+    /// </summary>
+    /// <param name="cityData">城市時區資料，如果為 null 則使用本地日期</param>
+    /// <returns>格式化的日期字串 (yyyy/MM/dd)</returns>
+    private static string GetCurrentDateForCity(CityTimeZone? cityData)
+    {
+        try
+        {
+            if (cityData?.TimeZone is null)
+            {
+                // 如果沒有指定城市資料，使用本地日期
+                return DateTime.Now.ToString("yyyy/MM/dd");
+            }
+
+            // 使用 TimeZoneInfo 來取得指定時區的日期
+            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(ConvertToWindowsTimeZoneId(cityData.TimeZone));
+            var utcNow = DateTime.UtcNow;
+            var localTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, timeZoneInfo);
+            
+            return localTime.ToString("yyyy/MM/dd");
+        }
+        catch (Exception)
+        {
+            // 如果時區轉換失敗，回到本地日期
+            return DateTime.Now.ToString("yyyy/MM/dd");
+        }
     }
 }
