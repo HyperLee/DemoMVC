@@ -1,36 +1,58 @@
 # 世界時鐘開發規格書
 
 ## 專案概述
-此頁面提供世界時鐘功能，讓使用者能夠方便查看不同時區的時間，適用於需要跨國協作或旅行規劃的使用場景。
+此專案為 DemoMVC 應用程式新增**獨立的世界時鐘功能頁面**。此功能與現有的首頁 (`Views/Home/Index.cshtml`) 完全分離，是一個全新的功能模組，提供多時區時間查看功能，適用於需要跨國協作或旅行規劃的使用場景。
+
+## ⚠️ 重要說明
+- **此為全新功能**：世界時鐘是完全獨立的新頁面
+- **不影響現有功能**：不會修改 `Views/Home/Index.cshtml` 或其相關功能
+- **獨立路由**：使用 `/WorldClock` 路由，與首頁 `/` 分離
+- **獨立資源**：使用專屬的 CSS、JavaScript 和檢視檔案
 
 ## 檔案位置及架構
 
-### 核心檔案結構
+### 核心檔案結構 (全新檔案)
 ```
 Controllers/
-└── WorldClockController.cs         # 新增 - 世界時鐘控制器
+├── HomeController.cs               # 現有 - 保持不變
+└── WorldClockController.cs         # 🆕 新增 - 世界時鐘控制器
 
 Views/
-└── WorldClock/                     # 新增 - 專用檢視資料夾
-    ├── Index.cshtml                # 新增 - 主頁面
-    └── _TimeZoneCard.cshtml        # 新增 - 時區卡片部分檢視
+├── Home/                           # 現有資料夾 - 保持不變
+│   ├── Index.cshtml               # 現有 - 電子鐘功能，保持不變
+│   └── Privacy.cshtml             # 現有 - 保持不變
+└── WorldClock/                     # 🆕 新增 - 專用檢視資料夾
+    ├── Index.cshtml                # 🆕 新增 - 世界時鐘主頁面
+    └── _TimeZoneCard.cshtml        # 🆕 新增 - 時區卡片部分檢視
 
 Models/
-└── WorldClockModels.cs             # 新增 - 時區資料模型
+├── ErrorViewModel.cs               # 現有 - 保持不變
+└── WorldClockModels.cs             # 🆕 新增 - 時區資料模型
 
 wwwroot/
 ├── css/
-│   └── worldclock.css              # 新增 - 專用樣式表
+│   ├── site.css                   # 現有 - 保持不變
+│   └── worldclock.css             # 🆕 新增 - 專用樣式表
 ├── js/
-│   └── worldclock.js               # 新增 - 專用 JavaScript
+│   ├── site.js                    # 現有 - 保持不變
+│   └── worldclock.js              # 🆕 新增 - 專用 JavaScript
 └── images/
-    └── flags/                      # 新增 - 國旗圖示 (選用)
+    └── flags/                      # 🆕 新增 - 國旗圖示 (選用)
 ```
 
 ### 路由配置
-- **主要路由**: `/WorldClock` 或 `/WorldClock/Index`
-- **API 路由**: `/WorldClock/GetTimeZones` (未來擴充)
-- **設定路由**: `/WorldClock/Settings` (未來擴充)
+```
+現有路由 (保持不變):
+├── /                              # 首頁 - 電子鐘功能
+├── /Home/Privacy                   # 隱私權頁面
+└── /Home/Error                     # 錯誤頁面
+
+新增路由 (世界時鐘功能):
+├── /WorldClock                     # 🆕 世界時鐘主頁
+├── /WorldClock/Index              # 🆕 同上 (明確路由)
+├── /WorldClock/GetTimeZones       # 🆕 時區資料 API (未來)
+└── /WorldClock/Settings           # 🆕 設定頁面 (未來擴充)
+```
 
 ## 功能需求
 
@@ -515,8 +537,17 @@ document.addEventListener('DOMContentLoaded', () => {
 ## 專案整合指南
 
 ### 導覽選單整合
-在 `Views/Shared/_Layout.cshtml` 中加入選單項目：
+在 `Views/Shared/_Layout.cshtml` 中加入新的選單項目 (不影響現有選單)：
 ```html
+<!-- 現有選單項目保持不變 -->
+<li class="nav-item">
+    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+</li>
+
+<!-- 🆕 新增世界時鐘選單項目 -->
 <li class="nav-item">
     <a class="nav-link text-dark" asp-controller="WorldClock" asp-action="Index">
         🌍 世界時鐘
@@ -566,11 +597,19 @@ services.Configure<WorldClockOptions>(Configuration.GetSection("WorldClock"));
 - [ ] 準備測試資料
 
 ### 開發階段
-- [ ] 建立 WorldClockController
-- [ ] 實作資料模型
-- [ ] 開發 Razor 檢視
-- [ ] 撰寫 JavaScript 功能
-- [ ] 設計 CSS 樣式
+- [ ] 建立 WorldClockController (新檔案)
+- [ ] 實作 WorldClockModels 資料模型 (新檔案)
+- [ ] 建立 Views/WorldClock/ 資料夾 (新資料夾)
+- [ ] 開發 Views/WorldClock/Index.cshtml (新檔案)
+- [ ] 開發 Views/WorldClock/_TimeZoneCard.cshtml (新檔案)
+- [ ] 撰寫 wwwroot/js/worldclock.js (新檔案)
+- [ ] 設計 wwwroot/css/worldclock.css (新檔案)
+- [ ] 更新導覽選單 (修改現有 _Layout.cshtml)
+
+**🔒 保護現有功能**
+- ❌ 不修改 Views/Home/Index.cshtml
+- ❌ 不修改 Controllers/HomeController.cs 現有方法
+- ❌ 不修改現有的 site.css 和 site.js
 
 ### 測試階段
 - [ ] 單元測試撰寫
