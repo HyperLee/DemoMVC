@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "type": "coreclr",
+      "request": "launch",
+      "name": "Launch DemoMVC",
+      "program": "${workspaceFolder}/DemoMVC/bin/Debug/net8.0/DemoMVC.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/DemoMVC",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "serverReadyAction": {
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      },
+      "preLaunchTask": "build"
+    }
+  ]
+}
