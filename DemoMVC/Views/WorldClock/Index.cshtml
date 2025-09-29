@@ -1,0 +1,91 @@
+@model WorldClockViewModel
+@{
+    ViewData["Title"] = "世界時鐘";
+}
+
+<div class="world-clock-container">
+    <!-- 頁面標題區域 -->
+    <header class="world-clock-header text-center mb-4">
+        <h1 class="display-4 world-clock-title">🌍 世界時鐘</h1>
+        <p class="lead text-muted">即時查看世界各地時間</p>
+    </header>
+
+    <!-- 主要時間顯示區域 -->
+    <div class="main-clock-section mb-5">
+        <div class="main-clock-card" data-city="@Model.DefaultCity" data-timezone="">
+            <h2 class="main-city-name">@Model.DefaultCity</h2>
+            <div class="main-time-display">00:00:00</div>
+            <small class="main-timezone-info">GMT+08:00</small>
+            <div class="main-date-display"></div>
+        </div>
+    </div>
+
+    <!-- 其他城市時間網格 -->
+    <div class="city-clocks-grid">
+        @foreach (var city in Model.Cities.Where(c => c.Name != Model.DefaultCity))
+        {
+            <partial name="_TimeZoneCard" model="city" />
+        }
+    </div>
+
+    <!-- 頁面底部日期顯示 -->
+    <div class="world-clock-footer">
+        <div class="date-display">
+            <small class="text-muted">當前日期：</small>
+            <span id="current-date">2024-01-01</span>
+        </div>
+        <div class="update-indicator">
+            <small class="text-muted">
+                <i class="bi bi-arrow-clockwise" id="update-icon"></i>
+                即時更新中
+            </small>
+        </div>
+    </div>
+</div>
+
+<!-- 載入提示 -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">載入中...</span>
+        </div>
+        <p class="loading-text mt-3">正在同步世界時間...</p>
+    </div>
+</div>
+
+<!-- 錯誤訊息顯示 -->
+<div id="error-message" class="alert alert-danger d-none" role="alert">
+    <h4 class="alert-heading">
+        <i class="bi bi-exclamation-triangle"></i> 
+        載入失敗
+    </h4>
+    <p class="mb-0">無法載入時區資料，請檢查網路連線後重新整理頁面。</p>
+    <hr>
+    <button type="button" class="btn btn-outline-danger btn-sm" onclick="location.reload()">
+        <i class="bi bi-arrow-clockwise"></i> 
+        重新載入
+    </button>
+</div>
+
+@section Scripts {
+    <script src="~/js/worldclock.js"></script>
+    <script>
+        // 初始化世界時鐘，傳入伺服器端的城市資料
+        document.addEventListener('DOMContentLoaded', function() {
+            const cities = @Html.Raw(Json.Serialize(Model.Cities));
+            const defaultCity = '@Model.DefaultCity';
+            
+            // 從 URL 參數取得指定的主要城市
+            const urlParams = new URLSearchParams(window.location.search);
+            const mainCityFromUrl = urlParams.get('main') || defaultCity;
+            
+            window.worldClockManager = new WorldClockManager(cities, mainCityFromUrl);
+        });
+    </script>
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/worldclock.css" />
+    <!-- Bootstrap Icons for UI enhancement -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+}

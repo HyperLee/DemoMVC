@@ -1,0 +1,53 @@
+@model CityTimeZone
+
+<div class="city-card" 
+     data-city="@Model.Name" 
+     data-timezone="@Model.TimeZone"
+     data-utc-offset="@Model.UtcOffset"
+     role="button"
+     tabindex="0"
+     aria-label="切換到 @Model.Name 時間">
+     
+    <!-- 城市資訊標頭 -->
+    <div class="city-header">
+        <h5 class="city-name">
+            @if (!string.IsNullOrEmpty(Model.CountryCode))
+            {
+                <span class="country-flag" data-country="@Model.CountryCode.ToLower()"></span>
+            }
+            @Model.Name
+        </h5>
+        <small class="timezone-offset">@Model.TimeZoneAbbreviation</small>
+    </div>
+
+    <!-- 時間顯示區域 -->
+    <div class="time-display-container">
+        <div class="time-display">
+            <span class="time">--:--:--</span>
+        </div>
+        <div class="date-display">
+            <small class="date">----/--/--</small>
+        </div>
+    </div>
+
+    <!-- 夏令時間指示器 -->
+    @if (Model.IsDaylightSaving)
+    {
+        <div class="dst-indicator">
+            <small class="dst-badge">
+                <i class="bi bi-sun"></i>
+                夏令時間
+            </small>
+        </div>
+    }
+
+    <!-- 時差顯示 -->
+    <div class="time-diff">
+        <small class="time-diff-text">與台北時差：<span class="diff-value">--</span></small>
+    </div>
+
+    <!-- 點選效果覆蓋層 -->
+    <div class="click-overlay">
+        <div class="click-ripple"></div>
+    </div>
+</div>
