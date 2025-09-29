@@ -4,5 +4,17 @@
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    
+    <!-- 電子鐘區域 -->
+    <section class="digital-clock-container" aria-label="即時電子鐘">
+        <div class="digital-clock-wrapper">
+            <h2 class="visually-hidden">當前時間</h2>
+            <time id="digitalClock" class="digital-clock" datetime="" role="timer" aria-live="polite">
+                --:--:--
+            </time>
+            <div class="clock-label">台灣標準時間</div>
+        </div>
+    </section>
+    
+    <p class="mt-4">Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>

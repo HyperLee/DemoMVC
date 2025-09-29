@@ -20,3 +20,205 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* ========================================
+   數位電子鐘樣式
+   ======================================== */
+
+.digital-clock-container {
+    padding: 3rem 1rem;
+    margin: 2rem auto;
+    max-width: 800px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+    border-radius: 20px;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 50px rgba(0, 123, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.digital-clock-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 123, 255, 0.05) 0%, transparent 70%);
+    animation: rotate 10s linear infinite;
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.digital-clock-wrapper {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    transform: perspective(1000px);
+}
+
+.digital-clock {
+    font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    background: linear-gradient(45deg, #ff0080, #ff8c00, #40e0d0);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 
+        0 0 20px rgba(255, 0, 128, 0.6),
+        0 0 40px rgba(255, 140, 0, 0.4),
+        0 0 60px rgba(64, 224, 208, 0.3);
+    animation: 
+        glow 2s ease-in-out infinite alternate,
+        gradientShift 6s ease-in-out infinite;
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin: 0;
+    line-height: 1.1;
+    position: relative;
+}
+
+.digital-clock::before {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: linear-gradient(45deg, rgba(255, 0, 128, 0.3), rgba(255, 140, 0, 0.3), rgba(64, 224, 208, 0.3));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: blur(2px);
+    z-index: -1;
+}
+
+@keyframes glow {
+    0% {
+        text-shadow: 
+            0 0 20px rgba(255, 0, 128, 0.6),
+            0 0 40px rgba(255, 140, 0, 0.4),
+            0 0 60px rgba(64, 224, 208, 0.3);
+    }
+    100% {
+        text-shadow: 
+            0 0 30px rgba(255, 0, 128, 0.8),
+            0 0 60px rgba(255, 140, 0, 0.6),
+            0 0 90px rgba(64, 224, 208, 0.5);
+    }
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.clock-label {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: clamp(0.875rem, 2vw, 1.25rem);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 1rem;
+    letter-spacing: 0.05em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .digital-clock-container {
+        margin: 1rem;
+        padding: 2rem 1rem;
+        border-radius: 15px;
+    }
+    
+    .digital-clock {
+        font-size: clamp(2rem, 12vw, 4rem);
+        letter-spacing: 0.05em;
+    }
+    
+    .clock-label {
+        font-size: 1rem;
+        margin-top: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .digital-clock-container {
+        padding: 1.5rem 0.5rem;
+    }
+    
+    .digital-clock {
+        font-size: clamp(1.5rem, 15vw, 3rem);
+    }
+    
+    .clock-label {
+        font-size: 0.875rem;
+    }
+}
+
+/* 高對比度模式支援 */
+@media (prefers-contrast: high) {
+    .digital-clock {
+        background: linear-gradient(45deg, #ffffff, #ffff00);
+        text-shadow: 
+            2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    
+    .digital-clock-container {
+        background: #000000;
+        border: 2px solid #ffffff;
+    }
+    
+    .clock-label {
+        color: #ffffff;
+    }
+}
+
+/* 減少動畫敏感度 */
+@media (prefers-reduced-motion: reduce) {
+    .digital-clock,
+    .digital-clock-container::before {
+        animation: none;
+    }
+    
+    .digital-clock {
+        text-shadow: 0 0 10px rgba(255, 0, 128, 0.5);
+    }
+}
+
+/* 暗色主題支援 */
+@media (prefers-color-scheme: dark) {
+    .digital-clock-container {
+        background: linear-gradient(135deg, #000000 0%, #111111 50%, #0a0a0a 100%);
+    }
+}
+
+/* 載入狀態 */
+.digital-clock.loading {
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* 錯誤狀態 */
+.digital-clock.error {
+    background: linear-gradient(45deg, #ff4444, #cc0000);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.6);
+}
