@@ -3,11 +3,34 @@
 ## 專案概述
 此頁面提供世界時鐘功能，讓使用者能夠方便查看不同時區的時間，適用於需要跨國協作或旅行規劃的使用場景。
 
-## 檔案位置
-- **前端檢視**: `/Users/qiuzili/DemoMVC/DemoMVC/Views/Home/index2.cshtml`
-- **控制器**: `/Users/qiuzili/DemoMVC/DemoMVC/Controllers/HomeController.cs` (需新增 Index2 Action)
-- **樣式表**: `/Users/qiuzili/DemoMVC/DemoMVC/wwwroot/css/site.css` (需新增樣式)
-- **JavaScript**: 嵌入在 Razor 檢視中或獨立 JS 檔案
+## 檔案位置及架構
+
+### 核心檔案結構
+```
+Controllers/
+└── WorldClockController.cs         # 新增 - 世界時鐘控制器
+
+Views/
+└── WorldClock/                     # 新增 - 專用檢視資料夾
+    ├── Index.cshtml                # 新增 - 主頁面
+    └── _TimeZoneCard.cshtml        # 新增 - 時區卡片部分檢視
+
+Models/
+└── WorldClockModels.cs             # 新增 - 時區資料模型
+
+wwwroot/
+├── css/
+│   └── worldclock.css              # 新增 - 專用樣式表
+├── js/
+│   └── worldclock.js               # 新增 - 專用 JavaScript
+└── images/
+    └── flags/                      # 新增 - 國旗圖示 (選用)
+```
+
+### 路由配置
+- **主要路由**: `/WorldClock` 或 `/WorldClock/Index`
+- **API 路由**: `/WorldClock/GetTimeZones` (未來擴充)
+- **設定路由**: `/WorldClock/Settings` (未來擴充)
 
 ## 功能需求
 
@@ -105,30 +128,244 @@
 - **城市時間**: 24px, font-weight: 600, monospace
 - **日期顯示**: 14px, font-weight: 400
 
+## 後端架構設計
+
+### WorldClockController 結構
+```csharp
+using Microsoft.AspNetCore.Mvc;
+using DemoMVC.Models;
+
+namespace DemoMVC.Controllers
+{
+    /// <summary>
+    /// 世界時鐘控制器 - 負責處理時區相關功能
+    /// </summary>
+    public class WorldClockController : Controller
+    {
+        private readonly ILogger<WorldClockController> _logger;
+
+        public WorldClockController(ILogger<WorldClockController> logger)
+        {
+            _logger = logger;
+        }
+
+        /// <summary>
+        /// 世界時鐘主頁面
+        /// </summary>
+        public IActionResult Index()
+        {
+            var model = new WorldClockViewModel
+            {
+                Cities = GetDefaultCities(),
+                DefaultCity = "台北"
+            };
+            
+            ViewData["Title"] = "世界時鐘";
+            return View(model);
+        }
+
+        /// <summary>
+        /// 取得時區資料 API
+        /// </summary>
+        [HttpGet]
+        public JsonResult GetTimeZones()
+        {
+            var cities = GetDefaultCities();
+            return Json(cities);
+        }
+
+        /// <summary>
+        /// 取得預設城市列表
+        /// </summary>
+        private List<CityTimeZone> GetDefaultCities()
+        {
+            return new List<CityTimeZone>
+            {
+                new() { Name = "台北", TimeZone = "Asia/Taipei", UtcOffset = "+08:00" },
+                new() { Name = "東京", TimeZone = "Asia/Tokyo", UtcOffset = "+09:00" },
+                new() { Name = "倫敦", TimeZone = "Europe/London", UtcOffset = "+00:00" },
+                new() { Name = "紐約", TimeZone = "America/New_York", UtcOffset = "-05:00" },
+                new() { Name = "洛杉磯", TimeZone = "America/Los_Angeles", UtcOffset = "-08:00" },
+                new() { Name = "巴黎", TimeZone = "Europe/Paris", UtcOffset = "+01:00" },
+                new() { Name = "柏林", TimeZone = "Europe/Berlin", UtcOffset = "+01:00" },
+                new() { Name = "莫斯科", TimeZone = "Europe/Moscow", UtcOffset = "+03:00" },
+                new() { Name = "新加坡", TimeZone = "Asia/Singapore", UtcOffset = "+08:00" },
+                new() { Name = "悉尼", TimeZone = "Australia/Sydney", UtcOffset = "+10:00" }
+            };
+        }
+    }
+}
+```
+
+### 資料模型設計
+```csharp
+namespace DemoMVC.Models
+{
+    /// <summary>
+    /// 世界時鐘檢視模型
+    /// </summary>
+    public class WorldClockViewModel
+    {
+        public List<CityTimeZone> Cities { get; set; } = new();
+        public string DefaultCity { get; set; } = "台北";
+    }
+
+    /// <summary>
+    /// 城市時區資料模型
+    /// </summary>
+    public class CityTimeZone
+    {
+        public string Name { get; set; } = string.Empty;
+        public string TimeZone { get; set; } = string.Empty;
+        public string UtcOffset { get; set; } = string.Empty;
+        public string? CountryCode { get; set; }
+        public bool IsDaylightSaving { get; set; }
+    }
+}
+```
+
 ## 實作細節
 
-### JavaScript 功能
-1. **時間計算函式**
-   ```javascript
-   - getCurrentTimeByTimezone(timezone)
-   - formatTime(date)
-   - updateAllClocks()
-   - switchMainClock(cityData)
-   ```
+### 前端 JavaScript 架構
 
-2. **事件處理**
-   - 城市卡片點選事件
-   - 定時器管理 (setInterval)
-   - 頁面載入初始化
+#### 核心功能模組 (worldclock.js)
+```javascript
+class WorldClockManager {
+    constructor() {
+        this.cities = [];
+        this.currentMainCity = '台北';
+        this.updateTimer = null;
+        this.init();
+    }
 
-3. **資料結構**
-   ```javascript
-   const cities = [
-     { name: '台北', timezone: 'Asia/Taipei', offset: '+8' },
-     { name: '東京', timezone: 'Asia/Tokyo', offset: '+9' },
-     // ...其他城市
-   ];
-   ```
+    /**
+     * 初始化世界時鐘
+     */
+    async init() {
+        await this.loadCityData();
+        this.renderClocks();
+        this.bindEvents();
+        this.startTimer();
+    }
+
+    /**
+     * 從後端載入城市資料
+     */
+    async loadCityData() {
+        try {
+            const response = await fetch('/WorldClock/GetTimeZones');
+            this.cities = await response.json();
+        } catch (error) {
+            console.error('載入城市資料失敗:', error);
+        }
+    }
+
+    /**
+     * 依時區取得當前時間
+     */
+    getCurrentTimeByTimezone(timezone) {
+        return new Intl.DateTimeFormat('zh-TW', {
+            timeZone: timezone,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        }).format(new Date());
+    }
+
+    /**
+     * 格式化日期
+     */
+    getCurrentDate(timezone) {
+        return new Intl.DateTimeFormat('zh-TW', {
+            timeZone: timezone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).format(new Date());
+    }
+
+    /**
+     * 更新所有時鐘顯示
+     */
+    updateAllClocks() {
+        this.cities.forEach(city => {
+            const timeElement = document.querySelector(`[data-city="${city.name}"] .time`);
+            if (timeElement) {
+                timeElement.textContent = this.getCurrentTimeByTimezone(city.timeZone);
+            }
+        });
+
+        // 更新日期顯示
+        const dateElement = document.querySelector('#current-date');
+        if (dateElement) {
+            const mainCity = this.cities.find(c => c.name === this.currentMainCity);
+            dateElement.textContent = this.getCurrentDate(mainCity?.timeZone || 'Asia/Taipei');
+        }
+    }
+
+    /**
+     * 切換主要時鐘顯示
+     */
+    switchMainClock(cityName) {
+        this.currentMainCity = cityName;
+        this.renderClocks();
+        
+        // 更新 URL 但不重新載入頁面
+        history.replaceState(null, null, `/WorldClock?main=${encodeURIComponent(cityName)}`);
+    }
+
+    /**
+     * 渲染時鐘界面
+     */
+    renderClocks() {
+        // 實作界面渲染邏輯
+    }
+
+    /**
+     * 綁定事件處理
+     */
+    bindEvents() {
+        // 城市卡片點選事件
+        document.addEventListener('click', (e) => {
+            const cityCard = e.target.closest('[data-city]');
+            if (cityCard) {
+                const cityName = cityCard.getAttribute('data-city');
+                this.switchMainClock(cityName);
+            }
+        });
+    }
+
+    /**
+     * 啟動定時更新
+     */
+    startTimer() {
+        this.updateTimer = setInterval(() => {
+            this.updateAllClocks();
+        }, 1000);
+    }
+
+    /**
+     * 停止定時更新 (頁面離開時)
+     */
+    stopTimer() {
+        if (this.updateTimer) {
+            clearInterval(this.updateTimer);
+            this.updateTimer = null;
+        }
+    }
+}
+
+// 頁面載入完成後初始化
+document.addEventListener('DOMContentLoaded', () => {
+    const worldClock = new WorldClockManager();
+    
+    // 頁面離開時清理資源
+    window.addEventListener('beforeunload', () => {
+        worldClock.stopTimer();
+    });
+});
+```
 
 ### CSS 動畫效果
 - 時間切換淡入淡出效果 (0.3s)
@@ -140,30 +377,209 @@
 - 避免頻繁的 DOM 操作
 - 記憶體洩漏防護 (清理定時器)
 
+## Razor 檢視結構
+
+### Index.cshtml 主頁面
+```html
+@model WorldClockViewModel
+@{
+    ViewData["Title"] = "世界時鐘";
+}
+
+<div class="world-clock-container">
+    <header class="text-center mb-4">
+        <h1 class="display-4">🌍 世界時鐘</h1>
+        <p class="lead text-muted">即時查看世界各地時間</p>
+    </header>
+
+    <!-- 主要時間顯示區 -->
+    <div class="main-clock-section">
+        <div class="main-clock-card" data-city="@Model.DefaultCity">
+            <h2 class="city-name">@Model.DefaultCity</h2>
+            <div class="main-time">00:00:00</div>
+            <small class="timezone-info">GMT+08:00</small>
+        </div>
+    </div>
+
+    <!-- 其他城市時間網格 -->
+    <div class="city-clocks-grid">
+        @foreach (var city in Model.Cities.Where(c => c.Name != Model.DefaultCity))
+        {
+            <partial name="_TimeZoneCard" model="city" />
+        }
+    </div>
+
+    <!-- 日期顯示 -->
+    <div class="date-display">
+        <span id="current-date">2024-01-01</span>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/worldclock.js"></script>
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/worldclock.css" />
+}
+```
+
+### _TimeZoneCard.cshtml 部分檢視
+```html
+@model CityTimeZone
+
+<div class="city-card" data-city="@Model.Name" data-timezone="@Model.TimeZone">
+    <div class="city-header">
+        <h5 class="city-name">@Model.Name</h5>
+        <small class="timezone">@Model.UtcOffset</small>
+    </div>
+    <div class="time-display">
+        <span class="time">--:--:--</span>
+    </div>
+    @if (Model.IsDaylightSaving)
+    {
+        <div class="dst-indicator">
+            <small>🌞 夏令時間</small>
+        </div>
+    }
+</div>
+```
+
 ## 測試需求
 
-### 功能測試
-- [ ] 時間顯示正確性驗證
-- [ ] 時區轉換準確性測試
-- [ ] 城市切換功能測試
-- [ ] 響應式佈局測試
+### 單元測試
+- [ ] WorldClockController 動作方法測試
+- [ ] CityTimeZone 模型驗證測試
+- [ ] 時區轉換邏輯測試
+- [ ] API 端點回應測試
+
+### 整合測試
+- [ ] 控制器與檢視整合測試
+- [ ] 資料庫連接測試 (如有使用)
+- [ ] 外部 API 整合測試
+
+### 前端測試
+- [ ] JavaScript 功能單元測試
+- [ ] UI 互動測試
 - [ ] 跨瀏覽器相容性測試
+- [ ] 響應式設計測試
+
+### 效能測試
+- [ ] 頁面載入速度 (<2秒)
+- [ ] JavaScript 執行效能
+- [ ] 記憶體洩漏檢測
+- [ ] 網路請求優化
 
 ### 使用者體驗測試
-- [ ] 載入速度測試 (<2秒)
-- [ ] 互動回應時間 (<100ms)
-- [ ] 視覺效果流暢度
-- [ ] 無障礙功能支援
+- [ ] 無障礙功能支援 (ARIA 標籤)
+- [ ] 鍵盤導覽支援
+- [ ] 行動裝置觸控優化
+- [ ] 視覺回饋效果測試
 
-## 部署注意事項
-- 確保伺服器時區設定正確
-- CDN 資源載入穩定性
-- 行動裝置觸控事件支援
-- SEO 友善的標題和描述
+## 部署與配置
 
-## 未來擴充功能
-- 自訂城市新增/移除
-- 12/24小時制切換
-- 時區搜尋功能
-- 主題色彩切換
-- 鬧鐘提醒功能
+### 開發環境設定
+```json
+// appsettings.Development.json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "DemoMVC.Controllers.WorldClockController": "Debug"
+    }
+  },
+  "WorldClock": {
+    "UpdateInterval": 1000,
+    "DefaultTimeZone": "Asia/Taipei"
+  }
+}
+```
+
+### 生產環境注意事項
+- [ ] 確保伺服器時區設定正確
+- [ ] 啟用 gzip 壓縮靜態資源
+- [ ] 配置 CDN 加速 JavaScript/CSS 載入
+- [ ] 設定適當的快取策略
+- [ ] 監控記憶體使用情況
+
+### SEO 優化
+```html
+<!-- 在 Layout 中加入 -->
+<meta name="description" content="世界時鐘 - 即時查看全球各大城市時間，支援多時區顯示">
+<meta name="keywords" content="世界時鐘,時區,GMT,UTC,國際時間">
+<meta property="og:title" content="世界時鐘 - 全球時間查詢">
+<meta property="og:description" content="方便的世界時鐘工具，一次查看多個城市的當前時間">
+```
+
+## 專案整合指南
+
+### 導覽選單整合
+在 `Views/Shared/_Layout.cshtml` 中加入選單項目：
+```html
+<li class="nav-item">
+    <a class="nav-link text-dark" asp-controller="WorldClock" asp-action="Index">
+        🌍 世界時鐘
+    </a>
+</li>
+```
+
+### 依賴注入配置 (如需要)
+```csharp
+// Program.cs 或 Startup.cs
+services.AddScoped<ITimeZoneService, TimeZoneService>();
+services.Configure<WorldClockOptions>(Configuration.GetSection("WorldClock"));
+```
+
+## 未來擴充功能規劃
+
+### 第一階段擴充
+- [ ] 使用者偏好設定儲存 (LocalStorage)
+- [ ] 12/24小時制切換
+- [ ] 深色/淺色主題切換
+- [ ] 城市搜尋功能
+
+### 第二階段擴充
+- [ ] 使用者帳戶整合
+- [ ] 自訂城市列表管理
+- [ ] 時區提醒/鬧鐘功能
+- [ ] 匯出功能 (PDF/圖片)
+
+### 第三階段擴充
+- [ ] 行動應用 API 支援
+- [ ] 即時推播通知
+- [ ] 多語言支援 (i18n)
+- [ ] 進階統計分析
+
+### 技術債務管理
+- [ ] 效能監控與優化
+- [ ] 單元測試覆蓋率提升
+- [ ] 程式碼重構與最佳化
+- [ ] 安全性審查與加強
+
+## 開發檢查清單
+
+### 開發前準備
+- [ ] 確認 .NET 8 SDK 安裝
+- [ ] 檢查專案相依套件
+- [ ] 設定開發環境變數
+- [ ] 準備測試資料
+
+### 開發階段
+- [ ] 建立 WorldClockController
+- [ ] 實作資料模型
+- [ ] 開發 Razor 檢視
+- [ ] 撰寫 JavaScript 功能
+- [ ] 設計 CSS 樣式
+
+### 測試階段
+- [ ] 單元測試撰寫
+- [ ] 整合測試執行
+- [ ] 跨瀏覽器測試
+- [ ] 效能測試驗證
+
+### 部署階段
+- [ ] 建構最佳化設定
+- [ ] 生產環境配置
+- [ ] 監控設定
+- [ ] 文件更新
