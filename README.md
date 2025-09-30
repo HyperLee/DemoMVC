@@ -6,7 +6,7 @@
 [![.NET Version](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
-[功能特色](#功能特色) • [快速開始](#快速開始) • [專案結構](#專案結構) • [技術規格](#技術規格) • [部署](#部署) • [文件](#文件)
+[功能特色](#功能特色) • [快速開始](#快速開始) • [專案結構](#專案結構) • [技術規格](#技術規格) • [部署](#部署) • [文件](#-文件)
 
 這是一個基於 ASP.NET Core 8.0 MVC 的展示專案，包含四大特色功能：
 
