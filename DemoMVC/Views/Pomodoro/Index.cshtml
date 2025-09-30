@@ -1,0 +1,188 @@
+@{
+    ViewData["Title"] = "番茄鐘工作法";
+}
+
+<link rel="stylesheet" href="~/css/pomodoro.css" />
+
+<div class="pomodoro-container">
+    <!-- 標題區 -->
+    <div class="pomodoro-header">
+        <h1 class="pomodoro-title">🍅 番茄鐘工作法</h1>
+        <p class="pomodoro-subtitle">專注工作，高效休息</p>
+    </div>
+
+    <!-- 主要內容區 -->
+    <div class="pomodoro-main">
+        <!-- 左側：計時器與控制 -->
+        <div class="timer-section">
+            <!-- 計時器卡片 -->
+            <div class="timer-card">
+                <div class="session-type-label" id="sessionTypeLabel">工作中</div>
+                
+                <!-- 圓形計時器 -->
+                <div class="timer-circle">
+                    <svg class="timer-svg" viewBox="0 0 200 200">
+                        <circle class="timer-bg" cx="100" cy="100" r="90"></circle>
+                        <circle class="timer-progress" id="timerProgress" cx="100" cy="100" r="90"></circle>
+                    </svg>
+                    <div class="timer-content">
+                        <div class="timer-display" id="timerDisplay">25:00</div>
+                        <div class="timer-status" id="timerStatus">準備開始</div>
+                    </div>
+                </div>
+
+                <!-- 當前任務顯示 -->
+                <div class="current-task" id="currentTaskDisplay">
+                    <span class="task-label">當前任務：</span>
+                    <span class="task-name" id="currentTaskName">尚未選擇任務</span>
+                </div>
+
+                <!-- 控制按鈕 -->
+                <div class="timer-controls">
+                    <button class="btn btn-primary btn-control" id="startBtn">
+                        <i class="fas fa-play"></i> 開始
+                    </button>
+                    <button class="btn btn-warning btn-control" id="pauseBtn" disabled>
+                        <i class="fas fa-pause"></i> 暫停
+                    </button>
+                    <button class="btn btn-secondary btn-control" id="resetBtn">
+                        <i class="fas fa-redo"></i> 重設
+                    </button>
+                </div>
+
+                <!-- 進度指示 -->
+                <div class="pomodoro-progress">
+                    <div class="progress-info">
+                        <span>本輪番茄：</span>
+                        <span id="currentCycle">0 / 4</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 統計資訊 -->
+            <div class="statistics-card">
+                <h3>📊 今日統計</h3>
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="todayPomodoros">0</div>
+                        <div class="stat-label">完成番茄</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="todayTasks">0</div>
+                        <div class="stat-label">完成任務</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="weekPomodoros">0</div>
+                        <div class="stat-label">本週番茄</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右側：任務管理 -->
+        <div class="task-section">
+            <!-- 新增任務表單 -->
+            <div class="task-input-card">
+                <h3>➕ 新增任務</h3>
+                <div class="task-input-form">
+                    <input type="text" 
+                           class="form-control task-input" 
+                           id="taskNameInput" 
+                           placeholder="輸入任務名稱..."
+                           maxlength="100">
+                    <input type="number" 
+                           class="form-control pomodoro-input" 
+                           id="estimatedPomodorosInput" 
+                           placeholder="預估番茄數"
+                           min="1"
+                           max="20"
+                           value="1">
+                    <button class="btn btn-success" id="addTaskBtn">
+                        <i class="fas fa-plus"></i> 新增
+                    </button>
+                </div>
+            </div>
+
+            <!-- 任務清單 -->
+            <div class="task-list-card">
+                <h3>📝 任務清單</h3>
+                
+                <!-- 任務過濾標籤 -->
+                <div class="task-filters">
+                    <button class="filter-btn active" data-filter="all">全部</button>
+                    <button class="filter-btn" data-filter="Pending">待處理</button>
+                    <button class="filter-btn" data-filter="InProgress">進行中</button>
+                    <button class="filter-btn" data-filter="Completed">已完成</button>
+                </div>
+
+                <!-- 任務列表 -->
+                <div class="task-list" id="taskList">
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>尚無任務，請新增第一個任務開始使用番茄鐘！</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 設定按鈕（懸浮） -->
+    <button class="settings-fab" id="settingsBtn" title="設定">
+        <i class="fas fa-cog"></i>
+    </button>
+</div>
+
+<!-- 設定彈出視窗 -->
+<div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">⚙️ 番茄鐘設定</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">工作時間（分鐘）</label>
+                    <input type="number" class="form-control" id="workDurationInput" min="1" max="120" value="25">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">短休息時間（分鐘）</label>
+                    <input type="number" class="form-control" id="shortBreakInput" min="1" max="30" value="5">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">長休息時間（分鐘）</label>
+                    <input type="number" class="form-control" id="longBreakInput" min="1" max="60" value="15">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">長休息觸發（完成幾個番茄後）</label>
+                    <input type="number" class="form-control" id="longBreakIntervalInput" min="2" max="10" value="4">
+                </div>
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="soundEnabledInput" checked>
+                        <label class="form-check-label">啟用音效提示</label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">音量大小</label>
+                    <input type="range" class="form-range" id="volumeInput" min="0" max="100" value="50">
+                </div>
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="autoStartInput">
+                        <label class="form-check-label">自動開始下一階段</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveSettingsBtn">儲存設定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="~/js/pomodoro.js"></script>
+}

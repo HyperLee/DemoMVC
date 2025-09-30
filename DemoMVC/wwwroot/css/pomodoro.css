@@ -1,0 +1,710 @@
+/* ===== 番茄鐘樣式 - 華麗科技感設計 ===== */
+
+/* CSS 變數定義 */
+:root {
+    /* 工作模式 - 活力橙紅漸層 */
+    --gradient-work: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --color-work-primary: #667eea;
+    --color-work-secondary: #764ba2;
+    
+    /* 短休息模式 - 清新綠藍漸層 */
+    --gradient-short-break: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --color-break-primary: #43e97b;
+    --color-break-secondary: #38f9d7;
+    
+    /* 長休息模式 - 舒適藍紫漸層 */
+    --gradient-long-break: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --color-long-break-primary: #4facfe;
+    --color-long-break-secondary: #00f2fe;
+    
+    /* 中性色系 */
+    --color-background: #0f0f23;
+    --color-surface: #1a1a2e;
+    --color-surface-light: #252541;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #a0a0c0;
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-shadow: rgba(0, 0, 0, 0.3);
+    
+    /* 動畫時長 */
+    --transition-fast: 0.2s;
+    --transition-normal: 0.3s;
+    --transition-slow: 0.6s;
+}
+
+/* 全域設定 */
+body {
+    background: var(--color-background);
+    color: var(--color-text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+}
+
+/* 主容器 */
+.pomodoro-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* 標題區 */
+.pomodoro-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    animation: fadeInDown 0.6s ease-out;
+}
+
+.pomodoro-title {
+    font-size: 3rem;
+    font-weight: 700;
+    background: var(--gradient-work);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.pomodoro-subtitle {
+    font-size: 1.2rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* 主要內容區 */
+.pomodoro-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    animation: fadeIn 0.8s ease-out;
+}
+
+/* ===== 計時器區域 ===== */
+.timer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* 計時器卡片 */
+.timer-card {
+    background: var(--color-surface);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px var(--color-shadow);
+    border: 1px solid var(--color-border);
+    backdrop-filter: blur(10px);
+    transition: transform var(--transition-normal);
+}
+
+.timer-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 48px var(--color-shadow);
+}
+
+/* 階段類型標籤 */
+.session-type-label {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    background: var(--gradient-work);
+    color: white;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+    transition: all var(--transition-normal);
+}
+
+.session-type-label.work {
+    background: var(--gradient-work);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+.session-type-label.short-break {
+    background: var(--gradient-short-break);
+    box-shadow: 0 4px 16px rgba(67, 233, 123, 0.4);
+}
+
+.session-type-label.long-break {
+    background: var(--gradient-long-break);
+    box-shadow: 0 4px 16px rgba(79, 172, 254, 0.4);
+}
+
+/* 圓形計時器 */
+.timer-circle {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    margin: 0 auto 2rem;
+}
+
+.timer-svg {
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+}
+
+.timer-bg {
+    fill: none;
+    stroke: var(--color-surface-light);
+    stroke-width: 8;
+}
+
+.timer-progress {
+    fill: none;
+    stroke: url(#gradient);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 565.48;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear;
+    filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.6));
+}
+
+/* 計時器內容 */
+.timer-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.timer-display {
+    font-size: 4rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    color: var(--color-text-primary);
+    text-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+    margin-bottom: 0.5rem;
+}
+
+.timer-status {
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+}
+
+/* 當前任務顯示 */
+.current-task {
+    text-align: center;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+}
+
+.task-label {
+    color: var(--color-text-secondary);
+    margin-right: 0.5rem;
+}
+
+.task-name {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+/* 控制按鈕 */
+.timer-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.btn-control {
+    min-width: 120px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-control:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-control:active:before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-control:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--color-shadow);
+}
+
+.btn-control:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-control:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 進度指示 */
+.pomodoro-progress {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.progress-info {
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+}
+
+.progress-info span:last-child {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+/* 統計資訊卡片 */
+.statistics-card {
+    background: var(--color-surface);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px var(--color-shadow);
+    border: 1px solid var(--color-border);
+}
+
+.statistics-card h3 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: all var(--transition-normal);
+}
+
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-3px);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    background: var(--gradient-work);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.5rem;
+}
+
+/* ===== 任務區域 ===== */
+.task-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* 任務輸入卡片 */
+.task-input-card {
+    background: var(--color-surface);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px var(--color-shadow);
+    border: 1px solid var(--color-border);
+}
+
+.task-input-card h3 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+}
+
+.task-input-form {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.75rem;
+}
+
+.task-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+}
+
+.task-input:focus {
+    outline: none;
+    border-color: var(--color-work-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.pomodoro-input {
+    width: 120px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    border-radius: 8px;
+    padding: 0.75rem;
+    text-align: center;
+}
+
+/* 任務清單卡片 */
+.task-list-card {
+    background: var(--color-surface);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px var(--color-shadow);
+    border: 1px solid var(--color-border);
+    flex: 1;
+}
+
+.task-list-card h3 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+}
+
+/* 任務過濾標籤 */
+.task-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 0.9rem;
+}
+
+.filter-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.filter-btn.active {
+    background: var(--gradient-work);
+    color: white;
+    border-color: transparent;
+}
+
+/* 任務列表 */
+.task-list {
+    max-height: 500px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* 自訂捲軸 */
+.task-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.task-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.task-list::-webkit-scrollbar-thumb {
+    background: var(--color-work-primary);
+    border-radius: 4px;
+}
+
+/* 空狀態 */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--color-text-secondary);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* 任務項目 */
+.task-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all var(--transition-normal);
+    animation: slideIn 0.3s ease-out;
+}
+
+.task-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(5px);
+}
+
+.task-item.status-completed {
+    opacity: 0.6;
+}
+
+.task-item.status-in-progress {
+    border-color: var(--color-work-primary);
+    box-shadow: 0 0 12px rgba(102, 126, 234, 0.3);
+}
+
+.task-info {
+    flex: 1;
+}
+
+.task-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--color-text-primary);
+}
+
+.task-meta {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+
+.task-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.task-badge.badge-pending {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+}
+
+.task-badge.badge-in-progress {
+    background: rgba(102, 126, 234, 0.2);
+    color: var(--color-work-primary);
+}
+
+.task-badge.badge-completed {
+    background: rgba(67, 233, 123, 0.2);
+    color: var(--color-break-primary);
+}
+
+.task-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.task-btn {
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 0.85rem;
+}
+
+.task-btn:hover {
+    transform: scale(1.05);
+}
+
+.task-btn.btn-start {
+    background: var(--gradient-work);
+    color: white;
+}
+
+.task-btn.btn-complete {
+    background: var(--gradient-short-break);
+    color: white;
+}
+
+.task-btn.btn-delete {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+/* 設定懸浮按鈕 */
+.settings-fab {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--gradient-work);
+    color: white;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 8px 24px var(--color-shadow);
+    transition: all var(--transition-normal);
+    z-index: 1000;
+}
+
+.settings-fab:hover {
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 12px 32px var(--color-shadow);
+}
+
+/* Modal 樣式調整 */
+.modal-content {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--color-border);
+}
+
+.form-control, .form-check-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--color-work-primary);
+    color: var(--color-text-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.form-label {
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* 動畫 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* 響應式設計 */
+@media (max-width: 1024px) {
+    .pomodoro-main {
+        grid-template-columns: 1fr;
+    }
+    
+    .timer-circle {
+        width: 280px;
+        height: 280px;
+    }
+    
+    .timer-display {
+        font-size: 3.5rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .pomodoro-container {
+        padding: 1rem;
+    }
+    
+    .pomodoro-title {
+        font-size: 2rem;
+    }
+    
+    .timer-circle {
+        width: 240px;
+        height: 240px;
+    }
+    
+    .timer-display {
+        font-size: 3rem;
+    }
+    
+    .timer-controls {
+        flex-direction: column;
+    }
+    
+    .btn-control {
+        width: 100%;
+    }
+    
+    .task-input-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .pomodoro-input {
+        width: 100%;
+    }
+    
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .task-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .task-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

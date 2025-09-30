@@ -1,3 +1,5 @@
+using DemoMVC.Services;
+
 namespace DemoMVC;
 
 public class Program
@@ -8,6 +10,9 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddControllersWithViews();
+        
+        // 註冊番茄鐘資料服務
+        builder.Services.AddScoped<IPomodoroDataService, PomodoroDataService>();
 
         var app = builder.Build();
 
