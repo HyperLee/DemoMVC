@@ -1,0 +1,44 @@
+{
+  "Settings": {
+    "WorkDuration": 25,
+    "ShortBreakDuration": 5,
+    "LongBreakDuration": 15,
+    "PomodorosUntilLongBreak": 4,
+    "SoundEnabled": true,
+    "Volume": 0.5,
+    "AutoStartNext": false
+  },
+  "Tasks": [
+    {
+      "Id": "43108f7b-79d1-49bb-9dbf-7a6a2f99dacc",
+      "TaskName": "1111",
+      "CreatedAt": "2025-10-01T00:15:50.059306+08:00",
+      "Status": 2,
+      "CompletedPomodoros": 0,
+      "EstimatedPomodoros": 1,
+      "CompletedAt": "2025-10-01T00:20:11.339668+08:00",
+      "Notes": null
+    },
+    {
+      "Id": "dc84ab64-c792-432b-a38b-4b5560df99b0",
+      "TaskName": "task 2",
+      "CreatedAt": "2025-10-01T00:21:18.462209+08:00",
+      "Status": 0,
+      "CompletedPomodoros": 0,
+      "EstimatedPomodoros": 1,
+      "CompletedAt": null,
+      "Notes": null
+    },
+    {
+      "Id": "ba43d912-8f55-4c6f-8238-f2ed12a91db0",
+      "TaskName": "task 3",
+      "CreatedAt": "2025-10-01T00:21:25.553896+08:00",
+      "Status": 0,
+      "CompletedPomodoros": 0,
+      "EstimatedPomodoros": 1,
+      "CompletedAt": null,
+      "Notes": null
+    }
+  ],
+  "Sessions": []
+}

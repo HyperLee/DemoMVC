@@ -40,39 +40,87 @@ const PomodoroApp = {
     
     // 初始化
     async init() {
-        console.log('番茄鐘應用程式初始化中...');
+        console.log('========================================');
+        console.log('🍅 番茄鐘應用程式初始化開始');
+        console.log('時間:', new Date().toLocaleString());
+        console.log('========================================');
         
-        // 初始化音效
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
-        // 載入設定和資料
-        await this.loadSettings();
-        await this.loadTasks();
-        await this.loadStatistics();
-        
-        // 綁定事件
-        this.bindEvents();
-        
-        // 更新 UI
-        this.updateTimerDisplay();
-        this.renderTasks();
-        
-        console.log('番茄鐘應用程式初始化完成');
+        try {
+            // 初始化音效
+            console.log('✓ 正在初始化音效系統...');
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            console.log('✓ 音效系統初始化完成');
+            
+            // ⚠️ 重要：先綁定事件，確保按鈕可以使用
+            console.log('✓ 優先綁定事件（確保 UI 可互動）...');
+            this.bindEvents();
+            
+            // 更新 UI
+            console.log('✓ 正在更新 UI...');
+            this.updateTimerDisplay();
+            
+            // 非同步載入資料（不阻塞 UI）
+            console.log('✓ 開始非同步載入資料...');
+            
+            // 使用 Promise.allSettled 確保即使某些 API 失敗也不會中斷
+            const results = await Promise.allSettled([
+                this.loadSettings(),
+                this.loadTasks(),
+                this.loadStatistics()
+            ]);
+            
+            // 檢查結果
+            results.forEach((result, index) => {
+                const names = ['loadSettings', 'loadTasks', 'loadStatistics'];
+                if (result.status === 'fulfilled') {
+                    console.log(`✓ ${names[index]} 完成`);
+                } else {
+                    console.warn(`⚠️ ${names[index]} 失敗:`, result.reason);
+                }
+            });
+            
+            console.log('========================================');
+            console.log('✅ 番茄鐘應用程式初始化完成');
+            console.log('========================================');
+        } catch (error) {
+            console.error('❌ 初始化過程中發生錯誤:', error);
+            console.error('錯誤堆疊:', error.stack);
+            console.log('⚠️ 即使發生錯誤，事件綁定應該已完成，UI 應可使用');
+        }
     },
     
     // ===== 設定管理 =====
     async loadSettings() {
+        console.log('→ loadSettings() 開始');
         try {
-            const response = await fetch('/Pomodoro/GetSettings');
+            // 設定 5 秒 timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const response = await fetch('/Pomodoro/GetSettings', {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            console.log('  API 回應狀態:', response.status);
             const result = await response.json();
+            console.log('  API 回應結果:', result);
             
             if (result.success) {
                 this.settings = result.data;
                 this.updateSettingsUI();
+                console.log('✓ loadSettings() 完成');
+            } else {
+                console.warn('⚠️ 載入設定失敗，使用預設值');
             }
         } catch (error) {
-            console.error('載入設定失敗:', error);
-            this.showNotification('載入設定失敗', 'error');
+            if (error.name === 'AbortError') {
+                console.error('❌ loadSettings() 請求超時（5秒）');
+            } else {
+                console.error('❌ loadSettings() 錯誤:', error);
+            }
+            console.log('使用預設設定值');
+            // 不要中斷初始化，使用預設值
         }
     },
     
@@ -103,47 +151,102 @@ const PomodoroApp = {
     },
     
     updateSettingsUI() {
-        document.getElementById('workDurationInput').value = this.settings.workDuration;
-        document.getElementById('shortBreakInput').value = this.settings.shortBreakDuration;
-        document.getElementById('longBreakInput').value = this.settings.longBreakDuration;
-        document.getElementById('longBreakIntervalInput').value = this.settings.pomodorosUntilLongBreak;
-        document.getElementById('soundEnabledInput').checked = this.settings.soundEnabled;
-        document.getElementById('volumeInput').value = this.settings.volume * 100;
-        document.getElementById('autoStartInput').checked = this.settings.autoStartNext;
+        console.log('→ updateSettingsUI() 開始');
+        try {
+            const workDurationInput = document.getElementById('workDurationInput');
+            const shortBreakInput = document.getElementById('shortBreakInput');
+            const longBreakInput = document.getElementById('longBreakInput');
+            const longBreakIntervalInput = document.getElementById('longBreakIntervalInput');
+            const soundEnabledInput = document.getElementById('soundEnabledInput');
+            const volumeInput = document.getElementById('volumeInput');
+            const autoStartInput = document.getElementById('autoStartInput');
+            
+            if (workDurationInput) workDurationInput.value = this.settings.workDuration;
+            if (shortBreakInput) shortBreakInput.value = this.settings.shortBreakDuration;
+            if (longBreakInput) longBreakInput.value = this.settings.longBreakDuration;
+            if (longBreakIntervalInput) longBreakIntervalInput.value = this.settings.pomodorosUntilLongBreak;
+            if (soundEnabledInput) soundEnabledInput.checked = this.settings.soundEnabled;
+            if (volumeInput) volumeInput.value = this.settings.volume * 100;
+            if (autoStartInput) autoStartInput.checked = this.settings.autoStartNext;
+            
+            console.log('✓ updateSettingsUI() 完成');
+        } catch (error) {
+            console.error('❌ updateSettingsUI() 錯誤:', error);
+        }
     },
     
     // ===== 任務管理 =====
     async loadTasks() {
+        console.log('→ loadTasks() 開始');
         try {
-            const response = await fetch('/Pomodoro/GetTasks');
+            // 設定 5 秒 timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const response = await fetch('/Pomodoro/GetTasks', {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            console.log('  API 回應狀態:', response.status);
             const result = await response.json();
+            console.log('  API 回應結果:', result);
             
             if (result.success) {
                 this.tasks = result.data;
                 this.renderTasks();
+                console.log('✓ loadTasks() 完成，任務數量:', this.tasks.length);
+            } else {
+                console.warn('⚠️ 載入任務失敗');
             }
         } catch (error) {
-            console.error('載入任務失敗:', error);
-            this.showNotification('載入任務失敗', 'error');
+            if (error.name === 'AbortError') {
+                console.error('❌ loadTasks() 請求超時（5秒）');
+            } else {
+                console.error('❌ loadTasks() 錯誤:', error);
+            }
+            // 不要中斷初始化
+            this.tasks = [];
+            this.renderTasks();
         }
     },
     
     async createTask(taskName, estimatedPomodoros) {
+        console.log('========================================');
+        console.log('📝 createTask() 被呼叫');
+        console.log('參數:');
+        console.log('  - taskName:', taskName);
+        console.log('  - estimatedPomodoros:', estimatedPomodoros);
+        console.log('========================================');
+        
         try {
+            console.log('🌐 準備發送 API 請求到 /Pomodoro/CreateTask');
+            const requestBody = {
+                taskName: taskName,
+                estimatedPomodoros: estimatedPomodoros
+            };
+            console.log('📦 請求內容:', JSON.stringify(requestBody, null, 2));
+            
             const response = await fetch('/Pomodoro/CreateTask', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    taskName: taskName,
-                    estimatedPomodoros: estimatedPomodoros
-                })
+                body: JSON.stringify(requestBody)
             });
             
+            console.log('📡 收到回應:');
+            console.log('  - Status:', response.status);
+            console.log('  - StatusText:', response.statusText);
+            console.log('  - OK:', response.ok);
+            
             const result = await response.json();
+            console.log('📦 回應內容:', result);
             
             if (result.success) {
+                console.log('✅ 任務新增成功！');
+                console.log('新增的任務:', result.data);
+                
                 this.tasks.push(result.data);
                 this.renderTasks();
                 this.showNotification('任務已新增', 'success');
@@ -151,11 +254,17 @@ const PomodoroApp = {
                 // 清空輸入框
                 document.getElementById('taskNameInput').value = '';
                 document.getElementById('estimatedPomodorosInput').value = '1';
+                console.log('✓ 輸入框已清空');
             } else {
+                console.error('❌ 任務新增失敗:', result.message);
                 this.showNotification(result.message || '新增任務失敗', 'error');
             }
         } catch (error) {
-            console.error('新增任務失敗:', error);
+            console.error('========================================');
+            console.error('❌ createTask() 發生錯誤');
+            console.error('錯誤訊息:', error.message);
+            console.error('錯誤堆疊:', error.stack);
+            console.error('========================================');
             this.showNotification('新增任務失敗', 'error');
         }
     },
@@ -202,7 +311,7 @@ const PomodoroApp = {
             if (result.success) {
                 const task = this.tasks.find(t => t.id === taskId);
                 if (task) {
-                    task.status = 'Completed';
+                    task.status = 2; // 2 = Completed enum 值
                     task.completedAt = new Date().toISOString();
                 }
                 this.renderTasks();
@@ -231,16 +340,29 @@ const PomodoroApp = {
     renderTasks() {
         const taskList = document.getElementById('taskList');
         
+        // Status 轉換函式
+        const statusEnumToString = {
+            0: 'Pending',
+            1: 'InProgress',
+            2: 'Completed'
+        };
+        
+        const getStatusString = (status) => {
+            return typeof status === 'number' ? statusEnumToString[status] : status;
+        };
+        
         // 過濾任務
         let filteredTasks = this.tasks;
         if (this.currentFilter !== 'all') {
-            filteredTasks = this.tasks.filter(t => t.status === this.currentFilter);
+            filteredTasks = this.tasks.filter(t => getStatusString(t.status) === this.currentFilter);
         }
         
         // 排序：進行中 > 待處理 > 已完成
         filteredTasks.sort((a, b) => {
             const statusOrder = { 'InProgress': 0, 'Pending': 1, 'Completed': 2 };
-            return statusOrder[a.status] - statusOrder[b.status];
+            const statusA = getStatusString(a.status);
+            const statusB = getStatusString(b.status);
+            return statusOrder[statusA] - statusOrder[statusB];
         });
         
         if (filteredTasks.length === 0) {
@@ -257,16 +379,28 @@ const PomodoroApp = {
     },
     
     renderTaskItem(task) {
+        // 處理 status：可能是字串或數字（enum）
+        // 0 = Pending, 1 = InProgress, 2 = Completed
+        const statusEnumToString = {
+            0: 'Pending',
+            1: 'InProgress',
+            2: 'Completed'
+        };
+        
+        const statusString = typeof task.status === 'number' 
+            ? statusEnumToString[task.status] 
+            : task.status;
+        
         const statusMap = {
             'Pending': { label: '待處理', class: 'badge-pending' },
             'InProgress': { label: '進行中', class: 'badge-in-progress' },
             'Completed': { label: '已完成', class: 'badge-completed' }
         };
         
-        const status = statusMap[task.status] || statusMap['Pending'];
+        const status = statusMap[statusString] || statusMap['Pending'];
         
         return `
-            <div class="task-item status-${task.status.toLowerCase()}" data-task-id="${task.id}">
+            <div class="task-item status-${statusString.toLowerCase()}" data-task-id="${task.id}">
                 <div class="task-info">
                     <div class="task-title">${this.escapeHtml(task.taskName)}</div>
                     <div class="task-meta">
@@ -275,7 +409,7 @@ const PomodoroApp = {
                     </div>
                 </div>
                 <div class="task-actions">
-                    ${task.status !== 'Completed' ? `
+                    ${statusString !== 'Completed' ? `
                         <button class="task-btn btn-start" onclick="PomodoroApp.startTaskSession('${task.id}')">
                             <i class="fas fa-play"></i> 開始
                         </button>
@@ -525,17 +659,36 @@ const PomodoroApp = {
     
     // ===== 統計資訊 =====
     async loadStatistics() {
+        console.log('→ loadStatistics() 開始');
         try {
-            const response = await fetch('/Pomodoro/GetStatistics?period=today');
+            // 設定 5 秒 timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const response = await fetch('/Pomodoro/GetStatistics?period=today', {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            console.log('  API 回應狀態:', response.status);
             const result = await response.json();
+            console.log('  API 回應結果:', result);
             
             if (result.success) {
                 document.getElementById('todayPomodoros').textContent = result.data.todayPomodoros;
                 document.getElementById('todayTasks').textContent = result.data.todayCompletedTasks;
                 document.getElementById('weekPomodoros').textContent = result.data.weekPomodoros;
+                console.log('✓ loadStatistics() 完成');
+            } else {
+                console.warn('⚠️ 載入統計資料失敗');
             }
         } catch (error) {
-            console.error('載入統計資料失敗:', error);
+            if (error.name === 'AbortError') {
+                console.error('❌ loadStatistics() 請求超時（5秒）');
+            } else {
+                console.error('❌ loadStatistics() 錯誤:', error);
+            }
+            // 不要中斷初始化
         }
     },
     
@@ -562,58 +715,152 @@ const PomodoroApp = {
     
     // ===== 事件綁定 =====
     bindEvents() {
+        console.log('========================================');
+        console.log('🔗 開始綁定事件');
+        console.log('========================================');
+        
         // 計時器控制
-        document.getElementById('startBtn').addEventListener('click', () => this.startTimer());
-        document.getElementById('pauseBtn').addEventListener('click', () => this.pauseTimer());
-        document.getElementById('resetBtn').addEventListener('click', () => this.resetTimer());
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        console.log('計時器按鈕檢查:');
+        console.log('  - startBtn:', startBtn ? '✓ 找到' : '✗ 未找到');
+        console.log('  - pauseBtn:', pauseBtn ? '✓ 找到' : '✗ 未找到');
+        console.log('  - resetBtn:', resetBtn ? '✓ 找到' : '✗ 未找到');
+        
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                console.log('🎯 開始按鈕被點擊');
+                this.startTimer();
+            });
+        }
+        
+        if (pauseBtn) {
+            pauseBtn.addEventListener('click', () => {
+                console.log('🎯 暫停按鈕被點擊');
+                this.pauseTimer();
+            });
+        }
+        
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                console.log('🎯 重設按鈕被點擊');
+                this.resetTimer();
+            });
+        }
         
         // 任務管理
-        document.getElementById('addTaskBtn').addEventListener('click', () => {
-            const taskName = document.getElementById('taskNameInput').value.trim();
-            const estimatedPomodoros = parseInt(document.getElementById('estimatedPomodorosInput').value) || 1;
-            
-            if (taskName) {
-                this.createTask(taskName, estimatedPomodoros);
-            } else {
-                this.showNotification('請輸入任務名稱', 'warning');
-            }
-        });
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const taskNameInput = document.getElementById('taskNameInput');
+        const estimatedPomodorosInput = document.getElementById('estimatedPomodorosInput');
+        
+        console.log('任務管理元素檢查:');
+        console.log('  - addTaskBtn:', addTaskBtn);
+        console.log('    → 是否存在:', addTaskBtn ? '✓ 找到' : '✗ 未找到');
+        if (addTaskBtn) {
+            console.log('    → ID:', addTaskBtn.id);
+            console.log('    → Class:', addTaskBtn.className);
+            console.log('    → Type:', addTaskBtn.type);
+        }
+        console.log('  - taskNameInput:', taskNameInput ? '✓ 找到' : '✗ 未找到');
+        console.log('  - estimatedPomodorosInput:', estimatedPomodorosInput ? '✓ 找到' : '✗ 未找到');
+        
+        if (addTaskBtn) {
+            console.log('✓ 正在為新增任務按鈕綁定點擊事件...');
+            addTaskBtn.addEventListener('click', (e) => {
+                // 防止表單提交（如果按鈕在 form 內）
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log('========================================');
+                console.log('🎯 新增任務按鈕被點擊！');
+                console.log('時間:', new Date().toLocaleString());
+                console.log('========================================');
+                
+                const taskName = document.getElementById('taskNameInput').value.trim();
+                const estimatedPomodoros = parseInt(document.getElementById('estimatedPomodorosInput').value) || 1;
+                
+                console.log('📝 任務資訊:');
+                console.log('  - 任務名稱:', taskName);
+                console.log('  - 預估番茄數:', estimatedPomodoros);
+                
+                if (taskName) {
+                    console.log('✓ 任務名稱驗證通過，呼叫 createTask()...');
+                    this.createTask(taskName, estimatedPomodoros);
+                } else {
+                    console.log('✗ 任務名稱為空，顯示警告');
+                    this.showNotification('請輸入任務名稱', 'warning');
+                }
+            });
+            console.log('✓ 新增任務按鈕事件綁定完成');
+        } else {
+            console.error('❌ 錯誤：找不到 addTaskBtn 元素！');
+        }
         
         // Enter 鍵新增任務
-        document.getElementById('taskNameInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                document.getElementById('addTaskBtn').click();
-            }
-        });
+        if (taskNameInput) {
+            console.log('✓ 正在為任務名稱輸入框綁定 Enter 鍵事件...');
+            taskNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    console.log('⌨️ Enter 鍵被按下，觸發新增任務按鈕');
+                    document.getElementById('addTaskBtn').click();
+                }
+            });
+            console.log('✓ Enter 鍵事件綁定完成');
+        }
         
         // 任務過濾
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                this.currentFilter = e.target.dataset.filter;
-                this.renderTasks();
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        console.log('過濾按鈕檢查:', filterBtns.length, '個按鈕');
+        if (filterBtns.length > 0) {
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    console.log('🎯 過濾按鈕被點擊:', e.target.dataset.filter);
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    this.currentFilter = e.target.dataset.filter;
+                    this.renderTasks();
+                });
             });
-        });
+        }
         
         // 設定按鈕
-        document.getElementById('settingsBtn').addEventListener('click', () => {
-            const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
-            modal.show();
-        });
+        const settingsBtn = document.getElementById('settingsBtn');
+        console.log('設定按鈕檢查:', settingsBtn ? '✓ 找到' : '✗ 未找到');
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+                console.log('🎯 設定按鈕被點擊');
+                const modalElement = document.getElementById('settingsModal');
+                if (modalElement && typeof bootstrap !== 'undefined') {
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                } else {
+                    console.error('❌ Bootstrap Modal 未載入或 settingsModal 元素不存在');
+                }
+            });
+        }
         
         // 儲存設定
-        document.getElementById('saveSettingsBtn').addEventListener('click', () => {
-            this.settings.workDuration = parseInt(document.getElementById('workDurationInput').value);
-            this.settings.shortBreakDuration = parseInt(document.getElementById('shortBreakInput').value);
-            this.settings.longBreakDuration = parseInt(document.getElementById('longBreakInput').value);
-            this.settings.pomodorosUntilLongBreak = parseInt(document.getElementById('longBreakIntervalInput').value);
-            this.settings.soundEnabled = document.getElementById('soundEnabledInput').checked;
-            this.settings.volume = parseFloat(document.getElementById('volumeInput').value) / 100;
-            this.settings.autoStartNext = document.getElementById('autoStartInput').checked;
-            
-            this.saveSettings();
-        });
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        if (saveSettingsBtn) {
+            saveSettingsBtn.addEventListener('click', () => {
+                console.log('儲存設定按鈕被點擊');
+                this.settings.workDuration = parseInt(document.getElementById('workDurationInput').value);
+                this.settings.shortBreakDuration = parseInt(document.getElementById('shortBreakInput').value);
+                this.settings.longBreakDuration = parseInt(document.getElementById('longBreakInput').value);
+                this.settings.pomodorosUntilLongBreak = parseInt(document.getElementById('longBreakIntervalInput').value);
+                this.settings.soundEnabled = document.getElementById('soundEnabledInput').checked;
+                this.settings.volume = parseFloat(document.getElementById('volumeInput').value) / 100;
+                this.settings.autoStartNext = document.getElementById('autoStartInput').checked;
+                
+                this.saveSettings();
+            });
+        }
+        
+        console.log('========================================');
+        console.log('✅ 事件綁定完成');
+        console.log('========================================');
     },
     
     // ===== 工具函式 =====
@@ -630,6 +877,21 @@ const PomodoroApp = {
 };
 
 // 當 DOM 載入完成後初始化
-document.addEventListener('DOMContentLoaded', () => {
+// 使用立即檢查或等待載入完成的方式
+console.log('========================================');
+console.log('📜 pomodoro.js 檔案已載入');
+console.log('時間:', new Date().toLocaleString());
+console.log('document.readyState:', document.readyState);
+console.log('========================================');
+
+if (document.readyState === 'loading') {
+    console.log('⏳ DOM 尚未載入完成，等待 DOMContentLoaded 事件...');
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('✓ DOMContentLoaded 事件觸發');
+        PomodoroApp.init();
+    });
+} else {
+    // DOM 已經載入完成，直接初始化
+    console.log('✓ DOM 已經載入完成，直接初始化');
     PomodoroApp.init();
-});
+}

@@ -3,6 +3,7 @@
 }
 
 <link rel="stylesheet" href="~/css/pomodoro.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
 
 <div class="pomodoro-container">
     <!-- 標題區 -->
@@ -97,7 +98,7 @@
                            min="1"
                            max="20"
                            value="1">
-                    <button class="btn btn-success" id="addTaskBtn">
+                    <button type="button" class="btn btn-success" id="addTaskBtn">
                         <i class="fas fa-plus"></i> 新增
                     </button>
                 </div>
@@ -183,6 +184,5 @@
 </div>
 
 @section Scripts {
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script src="~/js/pomodoro.js"></script>
 }

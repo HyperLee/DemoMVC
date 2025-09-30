@@ -24,7 +24,8 @@ public class Program
             app.UseHsts();
         }
 
-        app.UseHttpsRedirection();
+        // 暫時註解掉 HTTPS 重定向，避免開發環境問題
+        // app.UseHttpsRedirection();
         app.UseStaticFiles();
 
         app.UseRouting();

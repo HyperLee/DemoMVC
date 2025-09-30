@@ -97,13 +97,30 @@ namespace DemoMVC.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTask([FromBody] CreateTaskRequest request)
         {
+            _logger.LogInformation("========================================");
+            _logger.LogInformation("📝 CreateTask API 被呼叫");
+            _logger.LogInformation("時間: {Time}", DateTime.Now);
+            _logger.LogInformation("========================================");
+            
             try
             {
+                _logger.LogInformation("📦 接收到的請求資料:");
+                _logger.LogInformation("  - TaskName: {TaskName}", request?.TaskName);
+                _logger.LogInformation("  - EstimatedPomodoros: {EstimatedPomodoros}", request?.EstimatedPomodoros);
+                
+                if (request == null)
+                {
+                    _logger.LogWarning("❌ 請求物件為 null");
+                    return Json(new { success = false, message = "請求資料為空" });
+                }
+                
                 if (string.IsNullOrWhiteSpace(request.TaskName))
                 {
+                    _logger.LogWarning("❌ 任務名稱為空");
                     return Json(new { success = false, message = "任務名稱不可為空" });
                 }
 
+                _logger.LogInformation("✓ 正在建立任務物件...");
                 var task = new PomodoroTask
                 {
                     TaskName = request.TaskName.Trim(),
@@ -111,14 +128,29 @@ namespace DemoMVC.Controllers
                     Status = Models.TaskStatus.Pending,
                     CompletedPomodoros = 0
                 };
+                
+                _logger.LogInformation("✓ 任務物件已建立:");
+                _logger.LogInformation("  - ID: {TaskId}", task.Id);
+                _logger.LogInformation("  - TaskName: {TaskName}", task.TaskName);
+                _logger.LogInformation("  - EstimatedPomodoros: {EstimatedPomodoros}", task.EstimatedPomodoros);
+                _logger.LogInformation("  - Status: {Status}", task.Status);
 
+                _logger.LogInformation("✓ 正在儲存任務到資料服務...");
                 var createdTask = await _dataService.AddTaskAsync(task);
+                _logger.LogInformation("✅ 任務儲存成功");
+                
                 return Json(new { success = true, data = createdTask });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "建立任務時發生錯誤");
+                _logger.LogError(ex, "❌ 建立任務時發生錯誤");
+                _logger.LogError("錯誤訊息: {Message}", ex.Message);
+                _logger.LogError("錯誤堆疊: {StackTrace}", ex.StackTrace);
                 return Json(new { success = false, message = "建立任務失敗" });
+            }
+            finally
+            {
+                _logger.LogInformation("========================================");
             }
         }
 
