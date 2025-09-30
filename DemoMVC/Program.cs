@@ -16,6 +16,9 @@ public class Program
         
         // 註冊地球儀資料服務
         builder.Services.AddScoped<IGlobeDataService, GlobeDataService>();
+        
+        // 註冊備忘錄資料服務
+        builder.Services.AddScoped<IMemorandumDataService, MemorandumDataService>();
 
         var app = builder.Build();
 

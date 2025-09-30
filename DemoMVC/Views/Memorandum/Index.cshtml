@@ -1,0 +1,188 @@
+@model List<DemoMVC.Models.Memorandum>
+@{
+    ViewData["Title"] = "備忘錄";
+}
+
+<div class="container mt-4">
+    <!-- 頁面標題 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4">
+                <i class="bi bi-journal-text"></i> 備忘錄
+            </h1>
+        </div>
+    </div>
+
+    <!-- 訊息顯示 -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- 搜尋與篩選區域 -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3 mb-md-0">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" 
+                       id="searchInput" 
+                       class="form-control" 
+                       placeholder="搜尋標題、內容或標籤...">
+            </div>
+        </div>
+        <div class="col-md-3 mb-3 mb-md-0">
+            <select id="tagFilter" class="form-select">
+                <option value="">所有標籤</option>
+                @foreach (var tag in ViewBag.Tags as List<string> ?? new List<string>())
+                {
+                    <option value="@tag">@tag</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <a href="@Url.Action("Create")" class="btn btn-primary w-100">
+                <i class="bi bi-plus-circle"></i> 新增備忘錄
+            </a>
+        </div>
+    </div>
+
+    <!-- 備忘錄卡片區域 -->
+    <div id="memorandumList" class="row g-3">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle"></i> 目前沒有備忘錄，點擊「新增備忘錄」開始建立。
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var memo in Model)
+            {
+                <div class="col-md-6 col-lg-4 memorandum-item" data-id="@memo.Id">
+                    <div class="card memorandum-card @(memo.IsPinned ? "pinned" : "")" 
+                         @if (!string.IsNullOrEmpty(memo.Color))
+                         {
+                             <text>style="border-left: 4px solid @memo.Color"</text>
+                         }>
+                        <div class="card-body">
+                            <!-- 標題與釘選圖示 -->
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">@memo.Title</h5>
+                                @if (memo.IsPinned)
+                                {
+                                    <i class="bi bi-pin-fill text-warning pin-icon" title="已釘選"></i>
+                                }
+                            </div>
+
+                            <!-- 內容預覽 -->
+                            <p class="card-text text-muted memo-content">
+                                @{
+                                    var preview = memo.Content.Length > 150 
+                                        ? memo.Content.Substring(0, 150) + "..." 
+                                        : memo.Content;
+                                }
+                                @preview
+                            </p>
+
+                            <!-- 標籤 -->
+                            @if (memo.Tags != null && memo.Tags.Any())
+                            {
+                                <div class="mb-2">
+                                    @foreach (var tag in memo.Tags)
+                                    {
+                                        <span class="badge bg-secondary me-1 tag-badge" 
+                                              data-tag="@tag" 
+                                              style="cursor: pointer;">
+                                            @tag
+                                        </span>
+                                    }
+                                </div>
+                            }
+
+                            <!-- 時間資訊 -->
+                            <div class="text-muted small mb-3">
+                                <i class="bi bi-clock"></i>
+                                更新於 @memo.UpdatedAt.ToString("yyyy/MM/dd HH:mm")
+                            </div>
+
+                            <!-- 操作按鈕 -->
+                            <div class="d-flex gap-2">
+                                <a href="@Url.Action("Edit", new { id = memo.Id })" 
+                                   class="btn btn-sm btn-outline-primary flex-fill">
+                                    <i class="bi bi-pencil"></i> 編輯
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-warning btn-toggle-pin"
+                                        data-id="@memo.Id"
+                                        data-pinned="@memo.IsPinned.ToString().ToLower()">
+                                    <i class="bi bi-pin@(memo.IsPinned ? "-fill" : "")"></i>
+                                    @(memo.IsPinned ? "取消釘選" : "釘選")
+                                </button>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-danger btn-delete"
+                                        data-id="@memo.Id"
+                                        data-title="@memo.Title">
+                                    <i class="bi bi-trash"></i> 刪除
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- 分頁區域 -->
+    <div id="paginationContainer" class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="分頁導航">
+                <ul class="pagination justify-content-center" id="pagination">
+                    <!-- 分頁按鈕將由 JavaScript 動態產生 -->
+                </ul>
+            </nav>
+            <div class="text-center text-muted" id="pageInfo">
+                <!-- 頁面資訊將由 JavaScript 動態產生 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 刪除確認 Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">確認刪除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>確定要刪除「<span id="deleteTitle"></span>」嗎？</p>
+                <p class="text-danger">此操作無法復原。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">確認刪除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/memorandum.css">
+    <script src="~/js/memorandum.js"></script>
+}

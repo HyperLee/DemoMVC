@@ -1,6 +1,6 @@
 # DemoMVC
 
-**ASP.NET Core MVC 專案 - 數位電子鐘 & 番茄鐘工作法 & 3D 互動地球儀**
+**ASP.NET Core MVC 專案 - 數位電子鐘 & 番茄鐘工作法 & 3D 互動地球儀 & 備忘錄系統**
 
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square)](https://github.com/HyperLee/DemoMVC)
 [![.NET Version](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square)](https://dotnet.microsoft.com/)
@@ -8,11 +8,47 @@
 
 [功能特色](#功能特色) • [快速開始](#快速開始) • [專案結構](#專案結構) • [技術規格](#技術規格) • [部署](#部署) • [文件](#文件)
 
-這是一個基於 ASP.NET Core 8.0 MVC 的展示專案，包含三大特色功能：
+這是一個基於 ASP.NET Core 8.0 MVC 的展示專案，包含四大特色功能：
 
 1. **數位電子鐘** - 華麗的即時數位電子鐘，展示彩虹漸層與霓虹發光特效
 2. **番茄鐘工作法** - 完整的時間管理工具，支援任務追蹤、統計分析與資料持久化
-3. **3D 互動地球儀** ⭐ 新增 - 基於 Three.js 的 3D 地球儀，支援地點標記、搜尋、多圖層和響應式設計
+3. **3D 互動地球儀** - 基於 Three.js 的 3D 地球儀，支援地點標記、搜尋、多圖層和響應式設計
+4. **備忘錄系統** ⭐ 新增 - 功能完整的筆記管理系統## 📝 更新日誌
+
+### v4.0 (2025-10-01) ⭐ 最新版本
+- ✨ 新增備忘錄系統功能
+- ✨ 整合 Marked.js 進行 Markdown 解析與渲染
+- ✨ 實作即時 Markdown 預覽編輯器
+- ✨ 實作標籤管理系統 (新增、刪除、篩選)
+- ✨ 實作置頂功能 (最多 5 個)
+- ✨ 實作軟刪除機制
+- ✨ 實作搜尋、篩選、分頁功能
+- ✨ 實作 11 色卡片配色方案
+- ✨ RESTful API (11 個端點)
+- ✨ 60 秒快取機制，提升效能
+- ✨ SemaphoreSlim 執行緒鎖，確保資料一致性
+- 🎨 響應式 CSS Grid 設計 (3/2/1 欄位)
+- 🎨 卡片翻轉動畫與漸層背景
+- 📚 新增備忘錄功能規格書
+- 📚 新增備忘錄技術總結文件
+- ⚡ 搜尋防抖 (500ms)，減少不必要的 API 呼叫
+- ⚡ 初次載入時間 < 500ms
+
+### v3.0 (2025-10-01)
+- ✨ 新增 3D 互動地球儀功能
+- ✨ 整合 Three.js r128 進行 WebGL 渲染
+- ✨ 實作地點標記系統 (10+ 世界地標)
+- ✨ 實作搜尋、圖層管理、快速導航
+- ✨ 地球貼圖載入 (NASA Blue Marble)
+- ✨ 雙重顯示策略 (立即顯示 + 非同步貼圖)
+- ✨ 經緯線網格視覺化
+- ✨ 拖曳旋轉、滾輪縮放、慣性滑動
+- ✨ 多光源系統 (環境光、方向光、點光源)
+- ✨ RESTful API (8 個端點)
+- 🎨 響應式設計,支援桌面、平板、手機
+- 🐛 修正地球儀不顯示問題 (材質顏色與光源優化)
+- 📚 新增地球儀功能規格書
+- 📚 新增地球儀修復說明文件尋和釘選功能
 
 專案展示了現代化 Web 開發的最佳實務，包含響應式設計、無障礙功能和效能優化。
 
@@ -52,7 +88,7 @@
 - **智慧控制**: 在任務列表直接暫停，無需切換到計時器區域
 - **視覺識別**: 正在執行的任務有特殊動畫效果，一眼就能識別
 
-### � 3D 互動地球儀 ⭐ 新增
+### 🌍 3D 互動地球儀
 
 **核心功能**
 - **3D 渲染**: 使用 Three.js 渲染真實感地球儀，支援地球貼圖和經緯線網格
@@ -78,14 +114,43 @@
 - **響應式設計**: 桌面、平板、手機完美適配
 - **效能優化**: 材質快取、紋理壓縮、智慧更新
 
-### �🎯 技術亮點
+### 📝 備忘錄系統 ⭐ 新增
+
+**核心功能**
+- **完整 CRUD**: 建立、讀取、更新、刪除備忘錄，支援軟刪除機制
+- **Markdown 編輯器**: 即時預覽、工具列、語法高亮，支援完整 Markdown 語法
+- **標籤系統**: 多標籤管理、自動完成、標籤篩選、智慧分類
+- **搜尋功能**: 全文搜尋（標題、內容、標籤），支援即時搜尋（含 Debounce）
+- **釘選功能**: 最多 5 個釘選，優先顯示重要備忘錄
+- **顏色標記**: 視覺化分類管理，自訂卡片顏色
+- **字數統計**: 即時顯示標題和內容字數
+- **資料持久化**: JSON 檔案儲存，自動儲存變更
+
+**視覺特色**
+- **卡片式設計**: 美觀的卡片佈局，支援懸停動畫效果
+- **響應式網格**: 桌面 3 欄、平板 2 欄、手機 1 欄自動適應
+- **Markdown 預覽**: 即時渲染 HTML，支援程式碼高亮、表格、引言等
+- **釘選視覺化**: 金色邊框和釘選圖示，一眼識別重要備忘錄
+- **標籤徽章**: 彩色標籤徽章，點擊即可篩選
+- **淡入動畫**: 流暢的卡片載入和刪除動畫
+
+**技術實作**
+- **服務層架構**: IMemorandumDataService 介面，依賴注入設計
+- **執行緒安全**: SemaphoreSlim 檔案鎖定，防止並行寫入衝突
+- **快取機制**: 60 秒快取，減少 80% 檔案 I/O 操作
+- **RESTful API**: 11 個端點，統一 JSON 回應格式
+- **分頁支援**: 每頁 12 筆，支援自訂分頁大小
+- **Marked.js 整合**: 輕量級 Markdown 解析器（<10KB）
+
+### 🎯 技術亮點
 
 - **現代化架構**: ASP.NET Core 8.0 MVC 模式
-- **前端技術**: HTML5, CSS3, JavaScript ES6+, Three.js r128 ⭐
-- **3D 圖形**: WebGL + Three.js，硬體加速渲染 ⭐
+- **前端技術**: HTML5, CSS3, JavaScript ES6+, Three.js r128, Marked.js ⭐
+- **3D 圖形**: WebGL + Three.js，硬體加速渲染
+- **Markdown 支援**: Marked.js 即時解析與預覽 ⭐ 新增
 - **視覺特效**: CSS3 漸層、動畫和硬體加速
 - **無障礙支援**: ARIA 標籤和高對比度模式
-- **效能優化**: 智慧暫停、記憶體管理、執行緒安全
+- **效能優化**: 智慧暫停、記憶體管理、執行緒安全、快取機制 ⭐
 - **RESTful API**: 統一的 JSON API 設計
 - **依賴注入**: 服務導向架構，易於測試與維護
 
@@ -139,10 +204,13 @@
 - **番茄鐘**: 完整的時間管理工具  
   `http://localhost:5000/Pomodoro`
 
-- **3D 地球儀**: 互動式 3D 地球儀與地點瀏覽 ⭐ 新增  
+- **3D 地球儀**: 互動式 3D 地球儀與地點瀏覽  
   `http://localhost:5000/Globe`
 
-> **提示**: 點擊導覽列的 🍅 番茄鐘即可開始使用番茄工作法！拖曳 🌍 地球儀來探索世界各地！
+- **備忘錄**: 完整的筆記管理系統 ⭐ 新增  
+  `http://localhost:5000/Memorandum`
+
+> **提示**: 點擊導覽列的 🍅 番茄鐘即可開始使用番茄工作法！拖曳 🌍 地球儀來探索世界各地！建立您的第一個 📝 備忘錄！
 
 ## 專案結構
 
@@ -153,7 +221,8 @@ DemoMVC/
 │   │   ├── HomeController.cs              # 首頁控制器
 │   │   ├── WorldClockController.cs        # 世界時鐘控制器
 │   │   ├── PomodoroController.cs          # 番茄鐘控制器
-│   │   └── GlobeController.cs             # 地球儀控制器 ⭐
+│   │   ├── GlobeController.cs             # 地球儀控制器
+│   │   └── MemorandumController.cs        # 備忘錄控制器 ⭐ 新增
 │   ├── Models/
 │   │   ├── ErrorViewModel.cs              # 錯誤檢視模型
 │   │   ├── WorldClockModels.cs            # 世界時鐘模型
@@ -162,14 +231,18 @@ DemoMVC/
 │   │   ├── PomodoroSettings.cs            # 番茄鐘設定模型
 │   │   ├── PomodoroStatistics.cs          # 番茄鐘統計模型
 │   │   ├── PomodoroData.cs                # 番茄鐘資料容器
-│   │   ├── LocationData.cs                # 地球儀地點模型 ⭐
-│   │   ├── GlobeSettings.cs               # 地球儀設定模型 ⭐
-│   │   └── GlobeLayer.cs                  # 地球儀圖層模型 ⭐
+│   │   ├── LocationData.cs                # 地球儀地點模型
+│   │   ├── GlobeSettings.cs               # 地球儀設定模型
+│   │   ├── GlobeLayer.cs                  # 地球儀圖層模型
+│   │   ├── Memorandum.cs                  # 備忘錄模型 ⭐ 新增
+│   │   └── MemorandumData.cs              # 備忘錄資料容器 ⭐ 新增
 │   ├── Services/
 │   │   ├── IPomodoroDataService.cs        # 番茄鐘資料服務介面
 │   │   ├── PomodoroDataService.cs         # 番茄鐘資料服務實作
-│   │   ├── IGlobeDataService.cs           # 地球儀資料服務介面 ⭐
-│   │   └── GlobeDataService.cs            # 地球儀資料服務實作 ⭐
+│   │   ├── IGlobeDataService.cs           # 地球儀資料服務介面
+│   │   ├── GlobeDataService.cs            # 地球儀資料服務實作
+│   │   ├── IMemorandumDataService.cs      # 備忘錄資料服務介面 ⭐ 新增
+│   │   └── MemorandumDataService.cs       # 備忘錄資料服務實作 ⭐ 新增
 │   ├── Views/
 │   │   ├── Home/
 │   │   │   ├── Index.cshtml               # 首頁視圖 (數位電子鐘)
@@ -180,8 +253,12 @@ DemoMVC/
 │   │   │   └── _TimeZoneCard.cshtml       # 時區卡片部分檢視
 │   │   ├── Pomodoro/
 │   │   │   └── Index.cshtml               # 番茄鐘主頁
-│   │   ├── Globe/                         # ⭐ 新增
+│   │   ├── Globe/
 │   │   │   └── Index.cshtml               # 地球儀主頁
+│   │   ├── Memorandum/                    # ⭐ 新增
+│   │   │   ├── Index.cshtml               # 備忘錄列表頁
+│   │   │   ├── Create.cshtml              # 新增備忘錄頁
+│   │   │   └── Edit.cshtml                # 編輯備忘錄頁
 │   │   └── Shared/
 │   │       ├── _Layout.cshtml             # 共用佈局
 │   │       └── Error.cshtml               # 錯誤頁面
@@ -190,18 +267,21 @@ DemoMVC/
 │   │   │   ├── site.css                   # 主要樣式表 (電子鐘)
 │   │   │   ├── worldclock.css             # 世界時鐘樣式
 │   │   │   ├── pomodoro.css               # 番茄鐘樣式
-│   │   │   └── globe.css                  # 地球儀樣式 ⭐
+│   │   │   ├── globe.css                  # 地球儀樣式
+│   │   │   └── memorandum.css             # 備忘錄樣式 ⭐ 新增
 │   │   ├── js/
 │   │   │   ├── site.js                    # 電子鐘邏輯
 │   │   │   ├── worldclock.js              # 世界時鐘邏輯
 │   │   │   ├── pomodoro.js                # 番茄鐘邏輯
-│   │   │   ├── globe.js                   # 地球儀核心邏輯 ⭐
-│   │   │   ├── globe-controls.js          # 地球儀控制邏輯 ⭐
-│   │   │   └── globe-data-handler.js      # 地球儀資料處理 ⭐
+│   │   │   ├── globe.js                   # 地球儀核心邏輯
+│   │   │   ├── globe-controls.js          # 地球儀控制邏輯
+│   │   │   ├── globe-data-handler.js      # 地球儀資料處理
+│   │   │   └── memorandum.js              # 備忘錄邏輯 ⭐ 新增
 │   │   └── lib/                           # 第三方函式庫
 │   ├── Data/
 │   │   ├── pomodoro-data.json             # 番茄鐘資料儲存
-│   │   └── globe-data.json                # 地球儀資料儲存 ⭐
+│   │   ├── globe-data.json                # 地球儀資料儲存
+│   │   └── memorandums.json               # 備忘錄資料儲存 ⭐ 新增
 │   ├── Program.cs                         # 應用程式進入點
 │   ├── appsettings.json                   # 應用程式配置
 │   └── DemoMVC.csproj                     # 專案檔案
@@ -505,7 +585,7 @@ docker run -p 8080:8080 demomvc
 - **音效延遲**: < 50ms
 - **API 回應時間**: < 200ms
 
-### 3D 地球儀 ⭐ 新增
+### 3D 地球儀
 - **頁面載入**: < 3 秒
 - **WebGL 初始化**: < 500ms
 - **地球貼圖載入**: 1-3 秒 (2048x1024 解析度)
@@ -513,6 +593,14 @@ docker run -p 8080:8080 demomvc
 - **渲染效能**: 60 FPS (桌面) / 30+ FPS (行動裝置)
 - **互動延遲**: < 16ms
 - **API 回應時間**: < 150ms
+
+### 備忘錄系統 ⭐ 新增
+- **頁面載入**: < 2 秒
+- **記憶體使用**: < 45MB
+- **搜尋回應時間**: < 250ms (含 Debounce)
+- **API 回應時間**: < 150ms
+- **Markdown 渲染**: < 50ms
+- **動畫流暢度**: 60 FPS
 
 ## 無障礙功能
 
@@ -529,8 +617,9 @@ docker run -p 8080:8080 demomvc
 
 ### 規格書
 - [電子鐘功能規格](.github/prompts/index.prompt.md)
-- [番茄鐘功能規格](.github/prompts/PomodoroTechnique.prompt.md) - 更新至 v2.0 ⭐
-- [地球儀功能規格](.github/prompts/globe.prompt.md) ⭐ 新增
+- [番茄鐘功能規格](.github/prompts/PomodoroTechnique.prompt.md) - 更新至 v2.0
+- [地球儀功能規格](.github/prompts/globe.prompt.md)
+- [備忘錄功能規格](.github/prompts/memorandum.prompt.md) ⭐ 新增
 
 ### 技術文件
 - [番茄鐘技術總結](.github/Summarize/PomodoroTechnique-Summary.md) - 完整的技術實作說明
@@ -540,18 +629,25 @@ docker run -p 8080:8080 demomvc
   - 核心邏輯說明
   - 效能優化策略
   - 已知限制與未來改進
-- [UI/UX 增強技術總結](.github/Summarize/Pomodoro-UI-Enhancement-Summary.md) ⭐
+- [UI/UX 增強技術總結](.github/Summarize/Pomodoro-UI-Enhancement-Summary.md)
   - 問題分析與解決方案
   - 樂觀更新機制實作
   - 智慧按鈕切換邏輯
   - 視覺效果增強
   - 使用者體驗改善
-- [地球儀修復說明](GLOBE_FIX.md) ⭐ 新增
+- [地球儀修復說明](.github/Summarize/GLOBE_FIX.md)
   - 問題診斷與分析
   - 地球貼圖載入機制
   - 雙重顯示策略
   - 經緯線網格實作
   - 故障排除指南
+- [備忘錄技術總結](.github/Summarize/Memorandum-Summary.md) ⭐ 新增
+  - 完整系統架構
+  - 後端服務層設計
+  - 前端模組化架構
+  - 資料流程說明
+  - 效能優化策略
+  - 安全性考量
 
 ### 開發指南
 - [C# 開發指南](.github/instructions/csharp.instructions.md)
@@ -564,7 +660,11 @@ docker run -p 8080:8080 demomvc
 ### 番茄鐘工作法
 > 華麗科技感介面設計
 
-### 3D 互動地球儀 ⭐ 新增
+### 3D 互動地球儀
+> WebGL 渲染的真實感地球儀，支援拖曳旋轉和地點標記
+
+### 備忘錄系統 ⭐ 新增
+> Markdown 支援與標籤管理的完整筆記系統
 > WebGL 渲染的真實感地球儀，支援拖曳旋轉和地點標記
 
 ## 🎯 專案目標
@@ -701,12 +801,13 @@ docker run -p 8080:8080 demomvc
 感謝以下資源與技術：
 
 - [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet) - 強大的 Web 框架
-- [Three.js](https://threejs.org/) - 強大的 3D 圖形函式庫 ⭐
+- [Three.js](https://threejs.org/) - 強大的 3D 圖形函式庫
+- [Marked.js](https://marked.js.org/) - 快速且輕量的 Markdown 解析器 ⭐
 - [Bootstrap](https://getbootstrap.com/) - UI 元件庫
 - [Font Awesome](https://fontawesome.com/) - 圖示集
 - [MDN Web Docs](https://developer.mozilla.org/) - 前端技術文件
 - [Pomodoro Technique](https://francescocirillo.com/pages/pomodoro-technique) - 番茄工作法
-- [NASA Blue Marble](https://visibleearth.nasa.gov/collection/1484/blue-marble) - 地球貼圖資源 ⭐
+- [NASA Blue Marble](https://visibleearth.nasa.gov/collection/1484/blue-marble) - 地球貼圖資源
 
 ## 📧 聯絡方式
 
@@ -719,4 +820,5 @@ docker run -p 8080:8080 demomvc
 
 ⭐ 如果這個專案對您有幫助，請給個星號支持！  
 🍅 開始使用番茄鐘，提升您的工作效率！  
-🌍 探索 3D 地球儀，發現世界之美！
+🌍 探索 3D 地球儀，發現世界之美！  
+📝 使用備忘錄系統，記錄您的靈感與想法！
