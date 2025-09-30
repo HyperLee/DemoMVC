@@ -1,0 +1,212 @@
+@{
+    ViewData["Title"] = "3D 互動式地球儀";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/globe.css" asp-append-version="true" />
+}
+
+<div class="globe-container">
+    <!-- 頂部導航列 -->
+    <div class="globe-header">
+        <h1 class="globe-title">🌐 3D 互動式地球儀</h1>
+        <div class="globe-header-info">
+            <span id="current-view-info">全球視角</span>
+            <span id="zoom-level-display">縮放: 2.5x</span>
+        </div>
+    </div>
+
+    <!-- 主要內容區域 -->
+    <div class="globe-main">
+        <!-- 左側控制面板 -->
+        <div class="control-panel" id="control-panel">
+            <div class="panel-header">
+                <h3>控制面板</h3>
+                <button class="panel-toggle" id="panel-toggle-left" aria-label="展開/收合控制面板">
+                    <span class="toggle-icon">◀</span>
+                </button>
+            </div>
+
+            <div class="panel-content">
+                <!-- 視角控制 -->
+                <div class="control-group">
+                    <h4>視角控制</h4>
+                    <button class="control-btn" id="reset-view-btn" aria-label="重置視角">
+                        🔄 重置視角
+                    </button>
+                    <button class="control-btn" id="fullscreen-btn" aria-label="全螢幕">
+                        ⛶ 全螢幕
+                    </button>
+                </div>
+
+                <!-- 自動旋轉 -->
+                <div class="control-group">
+                    <h4>自動旋轉</h4>
+                    <div class="switch-container">
+                        <label class="switch">
+                            <input type="checkbox" id="auto-rotate-toggle">
+                            <span class="slider"></span>
+                        </label>
+                        <span>啟用自動旋轉</span>
+                    </div>
+                    <div class="speed-control">
+                        <label for="rotation-speed">旋轉速度:</label>
+                        <input type="range" id="rotation-speed" min="0.1" max="2.0" step="0.1" value="0.5">
+                        <span id="speed-value">0.5</span>
+                    </div>
+                </div>
+
+                <!-- 圖層控制 -->
+                <div class="control-group">
+                    <h4>圖層控制</h4>
+                    <div class="layer-list" id="layer-list">
+                        <div class="layer-item">
+                            <input type="checkbox" id="layer-borders" checked>
+                            <label for="layer-borders">國家邊界</label>
+                        </div>
+                        <div class="layer-item">
+                            <input type="checkbox" id="layer-cities" checked>
+                            <label for="layer-cities">城市標記</label>
+                        </div>
+                        <div class="layer-item">
+                            <input type="checkbox" id="layer-terrain">
+                            <label for="layer-terrain">地形高度</label>
+                        </div>
+                        <div class="layer-item">
+                            <input type="checkbox" id="layer-climate">
+                            <label for="layer-climate">氣候區域</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 快速導航 -->
+                <div class="control-group">
+                    <h4>快速導航</h4>
+                    <div class="quick-nav-list" id="quick-nav-list">
+                        <button class="nav-btn" data-location="台北">🇹🇼 台北</button>
+                        <button class="nav-btn" data-location="東京">🇯🇵 東京</button>
+                        <button class="nav-btn" data-location="巴黎">🇫🇷 巴黎</button>
+                        <button class="nav-btn" data-location="紐約">🇺🇸 紐約</button>
+                        <button class="nav-btn" data-location="倫敦">🇬🇧 倫敦</button>
+                        <button class="nav-btn" data-location="雪梨">🇦🇺 雪梨</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中央 3D 地球儀區域 -->
+        <div class="globe-canvas-wrapper">
+            <!-- 載入指示器 -->
+            <div class="loading-overlay" id="loading-overlay">
+                <div class="loading-spinner"></div>
+                <p>載入地球儀中...</p>
+            </div>
+
+            <!-- 3D 渲染區域 -->
+            <div id="globe-canvas" class="globe-canvas" role="img" aria-label="互動式 3D 地球儀"></div>
+
+            <!-- 搜尋框 -->
+            <div class="search-container">
+                <input type="text" id="location-search" placeholder="搜尋地點..." aria-label="搜尋地點">
+                <div class="search-results" id="search-results"></div>
+            </div>
+
+            <!-- 縮放控制 -->
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="zoom-in-btn" aria-label="放大">+</button>
+                <button class="zoom-btn" id="zoom-out-btn" aria-label="縮小">−</button>
+            </div>
+
+            <!-- 座標顯示 -->
+            <div class="coordinates-display" id="coordinates-display">
+                <span id="cursor-coords">緯度: 0.00°, 經度: 0.00°</span>
+            </div>
+        </div>
+
+        <!-- 右側資訊面板 -->
+        <div class="info-panel" id="info-panel">
+            <div class="panel-header">
+                <h3>地點資訊</h3>
+                <button class="panel-toggle" id="panel-toggle-right" aria-label="展開/收合資訊面板">
+                    <span class="toggle-icon">▶</span>
+                </button>
+                <button class="panel-close" id="panel-close" aria-label="關閉資訊面板">✕</button>
+            </div>
+
+            <div class="panel-content" id="info-panel-content">
+                <div class="no-selection">
+                    <p>👆 點擊地球上的標記以查看詳細資訊</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部工具列 (行動版) -->
+    <div class="bottom-toolbar">
+        <button class="toolbar-btn" id="mobile-controls-btn" aria-label="控制選項">
+            <span>⚙️</span>
+            <span class="btn-label">控制</span>
+        </button>
+        <button class="toolbar-btn" id="mobile-search-btn" aria-label="搜尋">
+            <span>🔍</span>
+            <span class="btn-label">搜尋</span>
+        </button>
+        <button class="toolbar-btn" id="mobile-layers-btn" aria-label="圖層">
+            <span>🗺️</span>
+            <span class="btn-label">圖層</span>
+        </button>
+        <button class="toolbar-btn" id="mobile-info-btn" aria-label="資訊">
+            <span>ℹ️</span>
+            <span class="btn-label">資訊</span>
+        </button>
+    </div>
+</div>
+
+<!-- 首次使用教學彈窗 -->
+<div class="tutorial-overlay" id="tutorial-overlay" style="display: none;">
+    <div class="tutorial-content">
+        <h2>歡迎使用 3D 互動式地球儀! 🌐</h2>
+        <div class="tutorial-steps">
+            <div class="tutorial-step">
+                <span class="step-icon">🖱️</span>
+                <h3>旋轉地球</h3>
+                <p>按住滑鼠左鍵拖曳,或在觸控裝置上滑動</p>
+            </div>
+            <div class="tutorial-step">
+                <span class="step-icon">🔍</span>
+                <h3>縮放視角</h3>
+                <p>使用滑鼠滾輪或雙指縮放手勢</p>
+            </div>
+            <div class="tutorial-step">
+                <span class="step-icon">📍</span>
+                <h3>查看地點</h3>
+                <p>點擊地球上的標記查看詳細資訊</p>
+            </div>
+            <div class="tutorial-step">
+                <span class="step-icon">⚙️</span>
+                <h3>更多功能</h3>
+                <p>使用左側控制面板調整圖層與設定</p>
+            </div>
+        </div>
+        <div class="tutorial-actions">
+            <label>
+                <input type="checkbox" id="dont-show-again">
+                不再顯示此教學
+            </label>
+            <button class="tutorial-close-btn" id="tutorial-close-btn">開始探索</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast 通知 -->
+<div class="toast-container" id="toast-container"></div>
+
+@section Scripts {
+    <!-- Three.js 函式庫 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- 地球儀 JavaScript 檔案 -->
+    <script src="~/js/globe-data-handler.js" asp-append-version="true"></script>
+    <script src="~/js/globe-controls.js" asp-append-version="true"></script>
+    <script src="~/js/globe.js" asp-append-version="true"></script>
+}

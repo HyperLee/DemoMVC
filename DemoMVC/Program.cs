@@ -13,6 +13,9 @@ public class Program
         
         // 註冊番茄鐘資料服務
         builder.Services.AddScoped<IPomodoroDataService, PomodoroDataService>();
+        
+        // 註冊地球儀資料服務
+        builder.Services.AddScoped<IGlobeDataService, GlobeDataService>();
 
         var app = builder.Build();
 
