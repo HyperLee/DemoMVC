@@ -1,20 +1,134 @@
 # Pomodoro Technique - 番茄鐘工作法
-> 版本: 1.0  
+> 版本: 2.0  
 > 建立日期: 2025-09-30  
+> 最後更新: 2025-10-01  
 > 專案: DemoMVC
 
 ---
 
 ## 📋 目錄
 1. [專案概述](#專案概述)
-2. [檔案位置規劃](#檔案位置規劃)
-3. [功能需求](#功能需求)
-4. [資料模型設計](#資料模型設計)
-5. [API 端點設計](#api-端點設計)
-6. [前端 UI/UX 設計](#前端-uiux-設計)
-7. [技術規格](#技術規格)
-8. [開發流程](#開發流程)
-9. [測試計畫](#測試計畫)
+2. [實作更新記錄](#實作更新記錄) ⭐ 新增
+3. [檔案位置規劃](#檔案位置規劃)
+4. [功能需求](#功能需求)
+5. [資料模型設計](#資料模型設計)
+6. [API 端點設計](#api-端點設計)
+7. [前端 UI/UX 設計](#前端-uiux-設計)
+8. [技術規格](#技術規格)
+9. [開發流程](#開發流程)
+10. [測試計畫](#測試計畫)
+
+---
+
+## 📝 實作更新記錄
+
+### 版本 2.0 更新 (2025-10-01)
+
+#### 與原規格的差異
+
+本專案在實作過程中，根據實際開發經驗和使用者體驗考量，對原規格進行了以下調整和增強：
+
+#### 1. 音效系統實作方式
+
+**原規格**:
+```
+wwwroot/sounds/
+├── work-complete.mp3
+└── break-complete.mp3
+```
+
+**實際實作**:
+- 使用 **Web Audio API** 動態生成音效
+- 不需要外部音效檔案
+- 優點：
+  - ✅ 無版權問題
+  - ✅ 減少檔案大小
+  - ✅ 即時生成，無載入延遲
+  - ✅ 可自訂音頻參數
+
+**實作程式碼** (`pomodoro.js`):
+```javascript
+playSound() {
+    if (!this.settings.soundEnabled || !this.audioContext) return;
+    
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(this.settings.volume, this.audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+    
+    oscillator.start(this.audioContext.currentTime);
+    oscillator.stop(this.audioContext.currentTime + 0.5);
+}
+```
+
+#### 2. 任務管理增強功能（超出原規格）
+
+##### A. 智慧按鈕切換
+- **功能**: 任務開始後，「開始」按鈕自動變成「暫停」按鈕
+- **實作日期**: 2025-10-01
+- **使用者價值**: 
+  - 一鍵操作，無需切換到計時器區域
+  - 即時視覺回饋，清楚顯示任務狀態
+
+##### B. 樂觀更新機制
+- **功能**: 點擊開始後立即更新 UI，不等待 API 回應
+- **實作日期**: 2025-10-01
+- **使用者價值**: 
+  - 零感知延遲
+  - 即時回饋
+
+##### C. 視覺效果增強
+- **功能**: 正在執行的任務有特殊視覺效果
+- **實作日期**: 2025-10-01
+- **視覺元素**:
+  - 脈搏動畫（陰影跳動）
+  - 旋轉圖示 🔄
+  - 特殊背景色和邊框
+
+#### 3. Bug 修正記錄
+
+##### Bug #1: 任務開始不會自動倒數
+- **發現日期**: 2025-10-01
+- **問題**: 點擊任務的「開始」按鈕後，需要再次點擊計時器的「開始」才會倒數
+- **原因**: `startTaskSession()` 沒有呼叫 `startTimer()`
+- **修正**: 在 `startTaskSession()` 中新增 `this.startTimer()`
+
+##### Bug #2: 任務狀態不更新
+- **發現日期**: 2025-10-01
+- **問題**: 任務開始後，不會顯示在「進行中」列表
+- **原因**: 
+  1. 後端只更新 Pending 狀態的任務
+  2. 前端沒有重新載入任務列表
+- **修正**:
+  1. 後端：改為更新所有非已完成的任務
+  2. 前端：新增樂觀更新和 API 回應後重新載入
+
+#### 4. 技術文件參考
+
+與本規格書相關的技術文件：
+
+1. **[番茄鐘技術總結](../Summarize/PomodoroTechnique-Summary.md)**  
+   - 完整的系統架構說明
+
+2. **[UI/UX 增強技術總結](../Summarize/Pomodoro-UI-Enhancement-Summary.md)**  
+   - 本次修正的完整記錄
+
+3. **[修正說明 v2](../../修正說明_v2.md)**  
+   - 使用者導向的修正說明
+
+#### 版本歷史
+
+| 版本 | 日期 | 主要變更 |
+|------|------|---------|
+| 1.0 | 2025-09-30 | 初始規格書 |
+| 2.0 | 2025-10-01 | 新增實作更新記錄章節 |
 
 ---
 

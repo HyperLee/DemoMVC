@@ -482,6 +482,23 @@ body {
     box-shadow: 0 0 12px rgba(102, 126, 234, 0.3);
 }
 
+/* 當前正在倒數的任務 */
+.task-item.current-task {
+    background: rgba(102, 126, 234, 0.15);
+    border-color: var(--color-work-primary);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(102, 126, 234, 0.7);
+    }
+}
+
 .task-info {
     flex: 1;
 }
@@ -542,6 +559,15 @@ body {
 .task-btn.btn-start {
     background: var(--gradient-work);
     color: white;
+}
+
+.task-btn.btn-pause {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: white;
+}
+
+.task-btn.btn-pause:hover {
+    background: linear-gradient(135deg, #ffb300 0%, #ff8f00 100%);
 }
 
 .task-btn.btn-complete {

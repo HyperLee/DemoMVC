@@ -251,14 +251,15 @@ namespace DemoMVC.Controllers
 
                 var createdSession = await _dataService.AddSessionAsync(session);
 
-                // 如果是工作階段，更新任務狀態
+                // 如果是工作階段，更新任務狀態為進行中（只要不是已完成狀態）
                 if (request.SessionType == SessionType.Work)
                 {
                     var task = await _dataService.GetTaskByIdAsync(request.TaskId);
-                    if (task != null && task.Status == Models.TaskStatus.Pending)
+                    if (task != null && task.Status != Models.TaskStatus.Completed)
                     {
                         task.Status = Models.TaskStatus.InProgress;
                         await _dataService.UpdateTaskAsync(task);
+                        _logger.LogInformation("任務 {TaskId} 狀態已更新為 InProgress", task.Id);
                     }
                 }
 

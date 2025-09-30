@@ -33,10 +33,10 @@
       "Id": "ba43d912-8f55-4c6f-8238-f2ed12a91db0",
       "TaskName": "task 3",
       "CreatedAt": "2025-10-01T00:21:25.553896+08:00",
-      "Status": 0,
+      "Status": 2,
       "CompletedPomodoros": 0,
       "EstimatedPomodoros": 1,
-      "CompletedAt": null,
+      "CompletedAt": "2025-10-01T00:36:37.901344+08:00",
       "Notes": null
     }
   ],

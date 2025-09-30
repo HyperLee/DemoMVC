@@ -326,15 +326,28 @@ const PomodoroApp = {
         }
     },
     
-    startTaskSession(taskId) {
+    async startTaskSession(taskId) {
         const task = this.tasks.find(t => t.id === taskId);
         if (!task) return;
         
+        // 設定當前任務
         this.timer.currentTaskId = taskId;
         document.getElementById('currentTaskName').textContent = task.taskName;
         
+        // 立即更新任務狀態為進行中（前端先更新，提升使用者體驗）
+        if (task.status !== 2) { // 2 = Completed
+            task.status = 1; // 1 = InProgress
+            this.renderTasks(); // 重新渲染任務列表，顯示「暫停」按鈕
+        }
+        
         // 重設計時器為工作時間
         this.resetTimer('Work');
+        
+        // 立即開始計時器倒數
+        this.startTimer();
+        
+        // 顯示通知
+        this.showNotification(`開始任務：${task.taskName}`, 'success');
     },
     
     renderTasks() {
@@ -399,20 +412,45 @@ const PomodoroApp = {
         
         const status = statusMap[statusString] || statusMap['Pending'];
         
+        // 檢查這個任務是否為當前正在倒數的任務
+        const isCurrentTask = this.timer.currentTaskId === task.id;
+        const isTimerRunning = this.timer.isRunning;
+        
+        // 決定顯示「開始」還是「暫停」按鈕
+        let actionButton = '';
+        if (statusString !== 'Completed') {
+            if (isCurrentTask && isTimerRunning) {
+                // 當前任務且計時器正在執行：顯示「暫停」按鈕
+                actionButton = `
+                    <button class="task-btn btn-pause" onclick="PomodoroApp.pauseTimer()">
+                        <i class="fas fa-pause"></i> 暫停
+                    </button>
+                `;
+            } else {
+                // 其他情況：顯示「開始」按鈕
+                actionButton = `
+                    <button class="task-btn btn-start" onclick="PomodoroApp.startTaskSession('${task.id}')">
+                        <i class="fas fa-play"></i> 開始
+                    </button>
+                `;
+            }
+        }
+        
         return `
-            <div class="task-item status-${statusString.toLowerCase()}" data-task-id="${task.id}">
+            <div class="task-item status-${statusString.toLowerCase()} ${isCurrentTask ? 'current-task' : ''}" data-task-id="${task.id}">
                 <div class="task-info">
-                    <div class="task-title">${this.escapeHtml(task.taskName)}</div>
+                    <div class="task-title">
+                        ${isCurrentTask && isTimerRunning ? '<i class="fas fa-spinner fa-pulse"></i> ' : ''}
+                        ${this.escapeHtml(task.taskName)}
+                    </div>
                     <div class="task-meta">
                         <span class="task-badge ${status.class}">${status.label}</span>
                         <span>🍅 ${task.completedPomodoros} / ${task.estimatedPomodoros}</span>
                     </div>
                 </div>
                 <div class="task-actions">
+                    ${actionButton}
                     ${statusString !== 'Completed' ? `
-                        <button class="task-btn btn-start" onclick="PomodoroApp.startTaskSession('${task.id}')">
-                            <i class="fas fa-play"></i> 開始
-                        </button>
                         <button class="task-btn btn-complete" onclick="PomodoroApp.completeTask('${task.id}')">
                             <i class="fas fa-check"></i> 完成
                         </button>
@@ -426,7 +464,7 @@ const PomodoroApp = {
     },
     
     // ===== 計時器功能 =====
-    startTimer() {
+    async startTimer() {
         if (this.timer.isRunning) return;
         
         // 如果沒有選擇任務，提示使用者
@@ -437,7 +475,7 @@ const PomodoroApp = {
         
         // 如果是新開始（不是暫停後繼續）
         if (!this.timer.isPaused) {
-            this.startSession();
+            await this.startSession();
         }
         
         this.timer.isRunning = true;
@@ -449,6 +487,9 @@ const PomodoroApp = {
         
         this.updateControlButtons();
         document.getElementById('timerStatus').textContent = '專注中...';
+        
+        // 重新渲染任務列表，更新按鈕狀態
+        this.renderTasks();
     },
     
     pauseTimer() {
@@ -460,6 +501,9 @@ const PomodoroApp = {
         
         this.updateControlButtons();
         document.getElementById('timerStatus').textContent = '已暫停';
+        
+        // 重新渲染任務列表，將「暫停」按鈕變回「開始」按鈕
+        this.renderTasks();
     },
     
     resetTimer(sessionType = null) {
@@ -559,6 +603,9 @@ const PomodoroApp = {
             if (result.success) {
                 this.timer.currentSessionId = result.data.id;
                 console.log('工作階段已開始:', result.data);
+                
+                // 重新載入任務以更新狀態（伺服器端會將任務狀態更新為 InProgress）
+                await this.loadTasks();
             }
         } catch (error) {
             console.error('開始工作階段失敗:', error);
