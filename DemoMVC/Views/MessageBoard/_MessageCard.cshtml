@@ -1,0 +1,138 @@
+@model dynamic
+
+@{
+    var message = Model.message;
+    var replies = Model.replies ?? new List<dynamic>();
+    var isOwner = Model.isOwner ?? false;
+    var isLiked = Model.isLiked ?? false;
+}
+
+<div class="message-card" data-message-id="@message.MessageId">
+    <div class="message-header">
+        <div class="message-author">
+            <i class="bi bi-person-circle"></i>
+            <span>匿名使用者</span>
+        </div>
+        <div class="message-time">
+            <i class="bi bi-clock"></i>
+            <span class="time-ago" data-created-at="@message.CreatedAt.ToString("o")">
+                @GetTimeAgo(message.CreatedAt)
+            </span>
+            @if (message.EditedAt != null)
+            {
+                <span class="edited-badge" title="編輯於 @message.EditedAt.Value.ToString("yyyy-MM-dd HH:mm")">
+                    (已編輯)
+                </span>
+            }
+        </div>
+    </div>
+
+    <div class="message-content" data-raw-content="@message.Content">
+        @Html.Raw(RenderMarkdown(message.Content))
+    </div>
+
+    <div class="message-actions">
+        <button class="btn btn-action btn-like @(isLiked ? "liked" : "")" 
+                data-message-id="@message.MessageId">
+            <i class="bi @(isLiked ? "bi-heart-fill" : "bi-heart")"></i>
+            <span class="like-count">@message.LikeCount</span>
+        </button>
+
+        <button class="btn btn-action btn-reply" data-message-id="@message.MessageId">
+            <i class="bi bi-reply"></i>
+            <span class="reply-count">@replies.Count</span>
+        </button>
+
+        @if (isOwner && message.CanEdit())
+        {
+            <button class="btn btn-action btn-edit" data-message-id="@message.MessageId">
+                <i class="bi bi-pencil"></i> 編輯
+            </button>
+        }
+
+        @if (isOwner)
+        {
+            <button class="btn btn-action btn-delete" data-message-id="@message.MessageId">
+                <i class="bi bi-trash"></i> 刪除
+            </button>
+        }
+    </div>
+
+    <!-- 回覆輸入框 (初始隱藏) -->
+    <div class="reply-input-section" style="display: none;">
+        <textarea class="form-control reply-textarea" 
+                  placeholder="輸入您的回覆..." 
+                  rows="2"
+                  maxlength="200"></textarea>
+        <div class="reply-input-footer">
+            <div class="char-counter">
+                <span class="reply-char-count">0</span> / 200
+            </div>
+            <div class="reply-buttons">
+                <button class="btn btn-sm btn-secondary btn-cancel-reply">取消</button>
+                <button class="btn btn-sm btn-primary btn-submit-reply">送出</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 回覆列表 -->
+    @if (replies.Count > 0)
+    {
+        <div class="replies-container">
+            @foreach (var reply in replies)
+            {
+                <div class="reply-item" data-message-id="@reply.MessageId">
+                    <div class="reply-header">
+                        <i class="bi bi-person-circle"></i>
+                        <span>匿名回覆</span>
+                        <span class="reply-time time-ago" data-created-at="@reply.CreatedAt.ToString("o")">
+                            @GetTimeAgo(reply.CreatedAt)
+                        </span>
+                    </div>
+                    <div class="reply-content">
+                        @Html.Raw(RenderMarkdown(reply.Content))
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@functions {
+    private string GetTimeAgo(DateTime dateTime)
+    {
+        var timeSpan = DateTime.Now - dateTime;
+        
+        if (timeSpan.TotalMinutes < 1)
+            return "剛剛";
+        if (timeSpan.TotalMinutes < 60)
+            return $"{(int)timeSpan.TotalMinutes} 分鐘前";
+        if (timeSpan.TotalHours < 24)
+            return $"{(int)timeSpan.TotalHours} 小時前";
+        
+        return $"{(int)timeSpan.TotalDays} 天前";
+    }
+
+    private string RenderMarkdown(string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+            return string.Empty;
+
+        // 簡易 Markdown 解析
+        var html = System.Net.WebUtility.HtmlEncode(content);
+        
+        // **粗體**
+        html = System.Text.RegularExpressions.Regex.Replace(html, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
+        
+        // *斜體*
+        html = System.Text.RegularExpressions.Regex.Replace(html, @"\*(.+?)\*", "<em>$1</em>");
+        
+        // ~~刪除線~~
+        html = System.Text.RegularExpressions.Regex.Replace(html, @"~~(.+?)~~", "<del>$1</del>");
+        
+        // 換行
+        html = html.Replace("\n", "<br>");
+        
+        return html;
+    }
+}

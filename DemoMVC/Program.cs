@@ -19,6 +19,17 @@ public class Program
         
         // 註冊備忘錄資料服務
         builder.Services.AddScoped<IMemorandumDataService, MemorandumDataService>();
+        
+        // 註冊留言板服務
+        builder.Services.AddSingleton<IMessageBoardService, MessageBoardService>();
+        
+        // 設定 Session (用於使用者識別)
+        builder.Services.AddSession(options =>
+        {
+            options.IdleTimeout = TimeSpan.FromDays(7);
+            options.Cookie.HttpOnly = false; // 允許前端存取
+            options.Cookie.IsEssential = true;
+        });
 
         var app = builder.Build();
 
@@ -35,6 +46,9 @@ public class Program
         app.UseStaticFiles();
 
         app.UseRouting();
+        
+        // 啟用 Session
+        app.UseSession();
 
         app.UseAuthorization();
 

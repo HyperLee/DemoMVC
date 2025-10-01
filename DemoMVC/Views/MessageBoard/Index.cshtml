@@ -1,0 +1,68 @@
+@{
+    ViewData["Title"] = "💬 匿名留言板";
+}
+
+<div class="messageboard-container">
+    <div class="messageboard-header">
+        <h1>💬 匿名留言板</h1>
+        <p class="subtitle">分享您的想法，24 小時後自動消失</p>
+    </div>
+
+    <!-- 新增留言區塊 -->
+    <div class="message-create-section">
+        <h5>✍️ 發表您的想法</h5>
+        <textarea id="newMessageContent" 
+                  class="form-control message-textarea" 
+                  placeholder="匿名留言，24 小時後自動刪除...&#10;支援 **粗體** *斜體* ~~刪除線~~ 等 Markdown 語法"
+                  rows="4"
+                  maxlength="200"></textarea>
+        <div class="message-create-footer">
+            <div class="char-counter">
+                <span id="charCount">0</span> / 200
+            </div>
+            <button id="submitMessage" class="btn btn-primary">
+                <i class="bi bi-send"></i> 發送
+            </button>
+        </div>
+        <div id="createMessageError" class="alert alert-danger mt-2" style="display: none;"></div>
+    </div>
+
+    <!-- 搜尋與排序工具列 -->
+    <div class="toolbar">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" 
+                   id="searchInput" 
+                   class="form-control" 
+                   placeholder="搜尋留言內容...">
+        </div>
+        <div class="sort-box">
+            <label for="sortSelect">排序:</label>
+            <select id="sortSelect" class="form-select">
+                <option value="newest">最新優先</option>
+                <option value="popular">最熱門優先</option>
+                <option value="oldest">最舊優先</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- 留言列表 -->
+    <div id="messagesContainer">
+        <div class="loading-spinner text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">載入中...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分頁導覽 -->
+    <nav id="paginationNav" style="display: none;">
+        <ul class="pagination justify-content-center" id="paginationList">
+        </ul>
+    </nav>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="~/css/messageboard.css" />
+    <script src="~/js/messageboard.js"></script>
+}
